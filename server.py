@@ -23,14 +23,36 @@ from datetime import datetime
 from time import time
 from hashlib import sha512
 from secrets import token_urlsafe
-
+import json
 
 app = Flask(__name__)
 
-users = [{"username": "s22537", "uid": "b38adf61-5e7d-4835-812f-364559dba4d4", "password": "936d6f62ed697a935e8a1b9808f26f63018e5c7c54ec1a873aa3457a78f905160b8b74df9cc270e8b652a51d31469eefc41a48e001a5dbe94cbb451c8c6149f4", "cookies": set()}]
+
+global unidb
+
+def read_database() -> None:
+    try:
+        dbfile = open("udb.json", "r")
+    except FileNotFoundError:
+        udb = []
+    else:
+        udb = json.load(dbfile)
+        assert type(udb) is list
+    finally:
+        dbfile.close()
+    return udb
+
+def write_database() -> None:
+    try:
+        dbfile = open("udb.json", "w")
+        json.dump(unidb, dbfile, indent='\t')
+    finally:
+        dbfile.close()
+
+unidb = read_database()
 
 def check_login(username: str, password: str) -> Optional(str):
-    for udic in users:
+    for udic in unidb:
         if udic["username"] == username:
             try:
                 salted = (udic["uid"] + ":" + password).encode("utf-8")
@@ -43,26 +65,33 @@ def check_login(username: str, password: str) -> Optional(str):
     return None
 
 def check_cookie(cookie: Optional(str)) -> Optional(str):
-    for udic in users:
+    for udic in unidb:
         if cookie in udic["cookies"]:
             return udic["uid"]
     return False
 
 def add_cookie(uid: str, cookie: str) -> None:
-    for udic in users:
+    for udic in unidb:
         if uid == udic["uid"]:
-            udic["cookies"].add(cookie)
+            udic["cookies"].append(cookie)
             return None
     raise ValueError(f'User "{uid}" not found')
 
 def get_username(uid: Optional(str)):
-    for udic in users:
+    for udic in unidb:
         if uid == udic["uid"]:
             return udic["username"]
 
+@app.route('/static/<path:path>', methods=['GET'])
+def static_(path):
+    return send_from_directory("static", path)
+
 @app.route('/', methods=['GET'])
 def index():
-    return make_response(request.cookies.get("biscuit"))
+    uid = check_cookie(request.cookies.get("biscuit"))
+    if not uid:
+        return redirect('/login')
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -84,5 +113,8 @@ def login():
     
 
 if __name__ == "__main__":
-    app.run(port=8000)
+    try:
+        app.run(port=8000)
+    finally:
+        write_database()
 
