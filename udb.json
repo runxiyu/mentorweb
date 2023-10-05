@@ -1,0 +1,54 @@
+[
+	{
+		"username": "s22537",
+		"email": "s22537@ykpaoschool.cn",
+		"uid": "b38adf61-5e7d-4835-812f-364559dba4d4",
+		"password": "936d6f62ed697a935e8a1b9808f26f63018e5c7c54ec1a873aa3457a78f905160b8b74df9cc270e8b652a51d31469eefc41a48e001a5dbe94cbb451c8c6149f4",
+		"cookies": [
+			"HMw3BhWaTjoT8Ue5UVHLkEhxcespmhIO7vOg849cJeX2IzVOp3IByDlxgbpO9k5lFrrrg41D3H7Va4KkDNgZaA"
+		],
+		"learning_courses": [
+			{
+				"subject": "10 History \u5386\u53f2",
+				"mentor": "84e3ff59-8e6c-45b7-980d-9ea914ce9e73",
+				"time": "Tuesday CCA2"
+			}
+		],
+		"teaching_courses": [
+			{
+				"subject": "10 Economics \u7ecf\u6d4e",
+				"mentor": "84e3ff59-8e6c-45b7-980d-9ea914ce9e73",
+				"time": "Tuesday CCA2"
+			}
+		],
+		"firstname": "Runxi",
+		"lastname": "Yu",
+		"middlename": "(Run Xi \u4e8e\u6da6\u7199)"
+	},
+	{
+		"username": "14003",
+		"email": "s14003@ykpaoschool.cn",
+		"uid": "84e3ff59-8e6c-45b7-980d-9ea914ce9e73",
+		"password": "",
+		"cookies": [
+			""
+		],
+		"learning_courses": [
+			{
+				"subject": "10 Economics \u7ecf\u6d4e",
+				"mentor": "b38adf61-5e7d-4835-812f-364559dba4d4",
+				"time": "Tuesday CCA3"
+			}
+		],
+		"teaching_courses": [
+			{
+				"subject": "10 History \u5386\u53f2",
+				"mentor": "84e3ff59-8e6c-45b7-980d-9ea914ce9e73",
+				"time": "Tuesday CCA2"
+			}
+		],
+		"firstname": "Aaron",
+		"lastname": "Zhang",
+		"middlename": "(Bo Jun \u5f20\u4f2f\u5747)"
+	}
+]

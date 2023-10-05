@@ -82,16 +82,33 @@ def get_username(uid: Optional(str)):
         if uid == udic["uid"]:
             return udic["username"]
 
+def get_udic(uid: Optional(str)):
+    for udic in unidb:
+        if uid == udic["uid"]:
+            return udic
+
+def get_lastfirstmiddle(uid: Optional(str)):
+    for udic in unidb:
+        if uid == udic["uid"]:
+            if udic["middlename"]:
+                return udic["lastname"] + ", " + udic["firstname"] + " " + udic["middlename"]
+            else:
+                return udic["lastname"] + ", " + udic["firstname"]
+
 @app.route('/static/<path:path>', methods=['GET'])
 def static_(path):
     return send_from_directory("static", path)
+
+def display_learning_courses(learning_courses):
+    return [[learning_course["subject"], get_lastfirstmiddle(learning_course["mentor"]), learning_course["time"]] for learning_course in learning_courses]
 
 @app.route('/', methods=['GET'])
 def index():
     uid = check_cookie(request.cookies.get("biscuit"))
     if not uid:
         return redirect('/login')
-    return render_template('index.html')
+    udic = get_udic(uid)
+    return render_template('index.html', lastfirstmiddle=get_lastfirstmiddle(uid), display_learning_courses=display_learning_courses(udic["learning_courses"]))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -110,11 +127,11 @@ def login():
     add_cookie(uid, biscuit)
     response.set_cookie('biscuit', biscuit)
     return response
-    
+
 
 if __name__ == "__main__":
     try:
-        app.run(port=8000)
+        app.run(port=8000, debug=True)
     finally:
         write_database()
 

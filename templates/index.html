@@ -6,9 +6,69 @@
 </head>
 <body>
 <header>
-	<h1>
-		Pao Mentoring
-	</h1>
+	<header>
+		<h1>
+			Pao Mentoring: {{lastfirstmiddle}}
+		</h1>
+	</header>
+	<h2>
+		Learning Courses:
+	</h2>
+	{% if display_learning_courses %}
+		<table>
+		<tr>
+			<th>
+				Subject
+			</th>
+			<th>
+				Mentor
+			</th>
+			<th>
+				Time
+			</th>
+		</tr>
+		{% for display_learning_course in display_learning_courses %}
+			<tr>
+				{% for field in display_learning_course %}
+				<td>
+					{{ field }}
+				</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+		</table>
+	{% else %}
+		You have no learning courses.
+	{% endif %}
+	<h2>
+		Mentoring Courses:
+	</h2>
+	{% if display_mentoring_courses %}
+		<table>
+		<tr>
+			<th>
+				Subject
+			</th>
+			<th>
+				Mentor
+			</th>
+			<th>
+				Time
+			</th>
+		</tr>
+		{% for display_mentoring_course in display_mentoring_courses %}
+			<tr>
+				{% for field in display_mentoring_course %}
+				<td>
+					{{ field }}
+				</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+		</table>
+	{% else %}
+		You have no mentoring courses.
+	{% endif %}
 </header>
 
 </body>
