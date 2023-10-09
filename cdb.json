@@ -20,5 +20,16 @@
 			"s22537"
 		],
 		"time_desc": "M"
+	},
+	{
+		"cid": "3",
+		"subject": "10 Chinese \u4e2d\u6587",
+		"mentors": [
+			"s14003"
+		],
+		"mentees": [
+			"s22537"
+		],
+		"time_desc": "M"
 	}
 ]

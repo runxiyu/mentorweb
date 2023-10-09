@@ -146,8 +146,35 @@ def get_lastfirstmiddle(username: Optional(str)):
 
 
 def get_class_student_home_actions(username, class_):
-    html = '<span class="classStudentHomeActions">'
+    html = '<span class="fawed">'
     html += '<a href="/deregister/%s">Deregister</a>' % class_["cid"]
+    html += '</span>'
+    
+    return Markup(html)
+
+def get_class_available_home_actions(username, class_):
+    html = '<span class="fawedfeds">'
+    html += '<a href="/register/%s">Register</a>' % class_["cid"]
+    html += '</span>'
+    
+    return Markup(html)
+
+
+def get_display_available_classes(username: str):
+    return [
+        (
+            class_["subject"],
+            get_lastfirstmiddle(class_["mentors"][0]),
+            class_["cid"],
+            class_["time_desc"],
+            get_class_available_home_actions(username, class_),
+        )
+        for class_ in classdb
+        if (username not in class_["mentees"]) and (username not in class_["mentors"])
+    ]
+def get_class_teacher_home_actions(username, class_):
+    html = '<span class="fasedhfiudshli">'
+    html += '<a href="/view-students/%s">View students</a>' % class_["cid"]
     html += '</span>'
     
     return Markup(html)
@@ -168,14 +195,44 @@ def get_display_learning_classes(username: str):
 
 
 def get_display_teaching_classes(username: str):
-    classes = [class_ for class_ in classdb if username in class_["mentors"]]
-    return "Hi"
+    return [
+        (
+            class_["subject"],
+            get_lastfirstmiddle(class_["mentors"][0]),
+            class_["cid"],
+            class_["time_desc"],
+            get_class_teacher_home_actions(username, class_),
+        )
+        for class_ in classdb
+        if username in class_["mentors"]
+    ]
 
 
 @app.route("/static/<path:path>", methods=["GET"])
 def static_(path: str):
     return send_from_directory("static", path)
 
+@app.route("/view-students/<cid>", methods=["GET"])
+def view_students(cid):
+    username = check_cookie(request.cookies.get("session-id"))
+    if not username:
+        return redirect("/login")
+    udic = get_udic(username)
+    if not username in get_cdic(cid)["mentors"]:
+        return "You are not a mentor in this section, you can't view the student list."
+    return "\n".join([get_lastfirstmiddle(u) for u in get_cdic(cid)["mentees"]])
+
+@app.route("/register/<cid>", methods=["GET"])
+def register(cid):
+    username = check_cookie(request.cookies.get("session-id"))
+    if not username:
+        return redirect("/login")
+    udic = get_udic(username)
+    if username in get_cdic(cid)["mentees"]:
+        return "You are already in this section!"
+    else:
+        get_cdic(cid)["mentees"].append(username)
+        return "Done!"
 @app.route("/deregister/<cid>", methods=["GET"])
 def deregister(cid):
     username = check_cookie(request.cookies.get("session-id"))
@@ -200,6 +257,8 @@ def index():
         "index.html",
         lastfirstmiddle=get_lastfirstmiddle(username),
         display_learning_classes=get_display_learning_classes(username),
+        display_teaching_classes=get_display_teaching_classes(username),
+        display_available_classes=get_display_available_classes(username),
     )
 
 
