@@ -29,23 +29,24 @@ app = Flask(__name__)
 
 
 global userdb
+global classdb
 
 def read_cdb() -> None:
     try:
         dbfile = open("cdb.json", "r")
     except FileNotFoundError:
-        udb = []
+        cdb = []
     else:
-        udb = json.load(dbfile)
-        assert type(udb) is list
+        cdb = json.load(dbfile)
+        assert type(cdb) is list
     finally:
         dbfile.close()
-    return udb
+    return cdb
 
 def write_cdb() -> None:
     try:
         dbfile = open("cdb.json", "w")
-        json.dump(userdb, dbfile, indent='\t')
+        json.dump(classdb, dbfile, indent='\t')
     finally:
         dbfile.close()
 
@@ -69,83 +70,80 @@ def write_udb() -> None:
         dbfile.close()
 
 userdb = read_udb()
-coursedb = read_cdb()
+classdb = read_cdb()
 
 def check_login(username: str, password: str) -> Optional(str):
     for udic in userdb:
         if udic["username"] == username:
             try:
-                salted = (udic["uid"] + ":" + password).encode("utf-8")
+                salted = (udic["salt"] + ":" + password).encode("utf-8")
             except UnicodeEncodeError:
                 return None
             if sha512(salted).hexdigest() == udic["password"]:
-                return udic["uid"]
+                return True
             else:
                 return None
     return None
+# /
 
 def check_cookie(cookie: Optional(str)) -> Optional(str):
     for udic in userdb:
         if cookie in udic["cookies"]:
-            return udic["uid"]
+            return udic["username"]
     return False
 
-def add_cookie(uid: str, cookie: str) -> None:
+def add_cookie(username: str, cookie: str) -> None:
     for udic in userdb:
-        if uid == udic["uid"]:
+        if username == udic["username"]:
             udic["cookies"].append(cookie)
             return None
-    raise ValueError(f'User "{uid}" not found')
+    raise ValueError(f'User "{username}" not found')
 
-def get_username(uid: Optional(str)):
+def get_udic(username: Optional(str)):
     for udic in userdb:
-        if uid == udic["uid"]:
-            return udic["username"]
-
-def get_udic(uid: Optional(str)):
-    for udic in userdb:
-        if uid == udic["uid"]:
+        if username == udic["username"]:
             return udic
 
-def get_lastfirstmiddle(uid: Optional(str)):
+def get_lastfirstmiddle(username: Optional(str)):
     for udic in userdb:
-        if uid == udic["uid"]:
+        if username == udic["username"]:
             if udic["middlename"]:
                 return udic["lastname"] + ", " + udic["firstname"] + " " + udic["middlename"]
             else:
                 return udic["lastname"] + ", " + udic["firstname"]
 
 @app.route('/static/<path:path>', methods=['GET'])
-def static_(path):
+def static_(path: str):
     return send_from_directory("static", path)
-
-def display_learning_courses(learning_courses):
-    return [[learning_course["subject"], get_lastfirstmiddle(learning_course["mentor"]), learning_course["time"]] for learning_course in learning_courses]
 
 @app.route('/', methods=['GET'])
 def index():
-    uid = check_cookie(request.cookies.get("biscuit"))
-    if not uid:
+    username = check_cookie(request.cookies.get("session-id"))
+    if not username:
         return redirect('/login')
-    udic = get_udic(uid)
-    return render_template('index.html', lastfirstmiddle=get_lastfirstmiddle(uid), display_learning_courses=display_learning_courses(udic["learning_courses"]))
+    udic = get_udic(username)
+    # TODO
+    return render_template(
+                                'index.html',
+                                lastfirstmiddle=get_lastfirstmiddle(username),
+                          )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == "GET":
-        uid = check_cookie(request.cookies.get("biscuit"))
-        if uid:
-            return render_template('login.html', note=f'Note: You are already logged in as "{get_username(uid)}". Only submit this form to login as another user.')
+        username = check_cookie(request.cookies.get("session-id"))
+        if username:
+            return render_template('login.html', note=f'Note: You are already logged in as "{username}". Only submit this form to login as another user.')
         return render_template('login.html')
     if not ("username" in request.form and "password" in request.form):
         return render_template("login.html", note='Error: Your request does not include the required fields "username" and "password".')
-    uid = check_login(request.form["username"], request.form["password"])
-    if not uid:
+    if not check_login(request.form["username"], request.form["password"]):
         return render_template("login.html", note='Error: Invalid credentials.')
+    username = request.form["username"]
+    session_id = token_urlsafe(64)
+    add_cookie(username, session_id)
     response = make_response(redirect('/'))
-    biscuit = token_urlsafe(64)
-    add_cookie(uid, biscuit)
-    response.set_cookie('biscuit', biscuit)
+    response.set_cookie('session-id', session_id)
     return response
 
 
@@ -154,4 +152,3 @@ if __name__ == "__main__":
         app.run(port=8000, debug=True)
     finally:
         write_udb()
-

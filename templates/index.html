@@ -41,9 +41,9 @@
 		You have no learning courses.
 	{% endif %}
 	<h2>
-		Mentoring Courses:
+		Teaching Courses:
 	</h2>
-	{% if display_mentoring_courses %}
+	{% if display_teaching_courses %}
 		<table>
 		<tr>
 			<th>
@@ -56,9 +56,9 @@
 				Time
 			</th>
 		</tr>
-		{% for display_mentoring_course in display_mentoring_courses %}
+		{% for display_teaching_course in display_teaching_courses %}
 			<tr>
-				{% for field in display_mentoring_course %}
+				{% for field in display_teaching_course %}
 				<td>
 					{{ field }}
 				</td>
@@ -67,7 +67,7 @@
 		{% endfor %}
 		</table>
 	{% else %}
-		You have no mentoring courses.
+		You have no teaching courses.
 	{% endif %}
 </header>
 
