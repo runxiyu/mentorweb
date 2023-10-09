@@ -28,9 +28,28 @@ import json
 app = Flask(__name__)
 
 
-global unidb
+global userdb
 
-def read_database() -> None:
+def read_cdb() -> None:
+    try:
+        dbfile = open("cdb.json", "r")
+    except FileNotFoundError:
+        udb = []
+    else:
+        udb = json.load(dbfile)
+        assert type(udb) is list
+    finally:
+        dbfile.close()
+    return udb
+
+def write_cdb() -> None:
+    try:
+        dbfile = open("cdb.json", "w")
+        json.dump(userdb, dbfile, indent='\t')
+    finally:
+        dbfile.close()
+
+def read_udb() -> None:
     try:
         dbfile = open("udb.json", "r")
     except FileNotFoundError:
@@ -42,17 +61,18 @@ def read_database() -> None:
         dbfile.close()
     return udb
 
-def write_database() -> None:
+def write_udb() -> None:
     try:
         dbfile = open("udb.json", "w")
-        json.dump(unidb, dbfile, indent='\t')
+        json.dump(userdb, dbfile, indent='\t')
     finally:
         dbfile.close()
 
-unidb = read_database()
+userdb = read_udb()
+coursedb = read_cdb()
 
 def check_login(username: str, password: str) -> Optional(str):
-    for udic in unidb:
+    for udic in userdb:
         if udic["username"] == username:
             try:
                 salted = (udic["uid"] + ":" + password).encode("utf-8")
@@ -65,30 +85,30 @@ def check_login(username: str, password: str) -> Optional(str):
     return None
 
 def check_cookie(cookie: Optional(str)) -> Optional(str):
-    for udic in unidb:
+    for udic in userdb:
         if cookie in udic["cookies"]:
             return udic["uid"]
     return False
 
 def add_cookie(uid: str, cookie: str) -> None:
-    for udic in unidb:
+    for udic in userdb:
         if uid == udic["uid"]:
             udic["cookies"].append(cookie)
             return None
     raise ValueError(f'User "{uid}" not found')
 
 def get_username(uid: Optional(str)):
-    for udic in unidb:
+    for udic in userdb:
         if uid == udic["uid"]:
             return udic["username"]
 
 def get_udic(uid: Optional(str)):
-    for udic in unidb:
+    for udic in userdb:
         if uid == udic["uid"]:
             return udic
 
 def get_lastfirstmiddle(uid: Optional(str)):
-    for udic in unidb:
+    for udic in userdb:
         if uid == udic["uid"]:
             if udic["middlename"]:
                 return udic["lastname"] + ", " + udic["firstname"] + " " + udic["middlename"]
@@ -133,5 +153,5 @@ if __name__ == "__main__":
     try:
         app.run(port=8000, debug=True)
     finally:
-        write_database()
+        write_udb()
 
