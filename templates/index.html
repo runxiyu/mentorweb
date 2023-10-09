@@ -14,7 +14,7 @@
 	<h2>
 		Learning Courses:
 	</h2>
-	{% if display_learning_courses %}
+	{% if display_learning_classes %}
 		<table>
 		<tr>
 			<th>
@@ -24,12 +24,18 @@
 				Mentor
 			</th>
 			<th>
+				Section #
+			</th>
+			<th>
 				Time
 			</th>
+			<th>
+				Actions
+			</th>
 		</tr>
-		{% for display_learning_course in display_learning_courses %}
+		{% for display_learning_class in display_learning_classes %}
 			<tr>
-				{% for field in display_learning_course %}
+				{% for field in display_learning_class %}
 				<td>
 					{{ field }}
 				</td>
@@ -43,7 +49,7 @@
 	<h2>
 		Teaching Courses:
 	</h2>
-	{% if display_teaching_courses %}
+	{% if display_teaching_classes %}
 		<table>
 		<tr>
 			<th>
@@ -56,9 +62,9 @@
 				Time
 			</th>
 		</tr>
-		{% for display_teaching_course in display_teaching_courses %}
+		{% for display_teaching_class in display_teaching_classes %}
 			<tr>
-				{% for field in display_teaching_course %}
+				{% for field in display_teaching_class %}
 				<td>
 					{{ field }}
 				</td>

@@ -18,7 +18,16 @@
 
 from __future__ import annotations
 from typing import Union, Optional
-from flask import Flask, render_template, request, redirect, abort, send_from_directory, make_response
+from markupsafe import Markup
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    abort,
+    send_from_directory,
+    make_response,
+)
 from datetime import datetime
 from time import time
 from hashlib import sha512
@@ -30,6 +39,7 @@ app = Flask(__name__)
 
 global userdb
 global classdb
+
 
 def read_cdb() -> None:
     try:
@@ -43,12 +53,14 @@ def read_cdb() -> None:
         dbfile.close()
     return cdb
 
+
 def write_cdb() -> None:
     try:
         dbfile = open("cdb.json", "w")
-        json.dump(classdb, dbfile, indent='\t')
+        json.dump(classdb, dbfile, indent="\t")
     finally:
         dbfile.close()
+
 
 def read_udb() -> None:
     try:
@@ -62,15 +74,18 @@ def read_udb() -> None:
         dbfile.close()
     return udb
 
+
 def write_udb() -> None:
     try:
         dbfile = open("udb.json", "w")
-        json.dump(userdb, dbfile, indent='\t')
+        json.dump(userdb, dbfile, indent="\t")
     finally:
         dbfile.close()
 
+
 userdb = read_udb()
 classdb = read_cdb()
+
 
 def check_login(username: str, password: str) -> Optional(str):
     for udic in userdb:
@@ -84,13 +99,17 @@ def check_login(username: str, password: str) -> Optional(str):
             else:
                 return None
     return None
+
+
 # /
+
 
 def check_cookie(cookie: Optional(str)) -> Optional(str):
     for udic in userdb:
         if cookie in udic["cookies"]:
             return udic["username"]
     return False
+
 
 def add_cookie(username: str, cookie: str) -> None:
     for udic in userdb:
@@ -99,51 +118,113 @@ def add_cookie(username: str, cookie: str) -> None:
             return None
     raise ValueError(f'User "{username}" not found')
 
+
 def get_udic(username: Optional(str)):
     for udic in userdb:
         if username == udic["username"]:
             return udic
 
+def get_cdic(cid: Optional(str)):
+    for cdic in classdb:
+        if cid == cdic["cid"]:
+            return cdic
+
+
 def get_lastfirstmiddle(username: Optional(str)):
     for udic in userdb:
         if username == udic["username"]:
             if udic["middlename"]:
-                return udic["lastname"] + ", " + udic["firstname"] + " " + udic["middlename"]
+                return (
+                    udic["lastname"]
+                    + ", "
+                    + udic["firstname"]
+                    + " "
+                    + udic["middlename"]
+                )
             else:
                 return udic["lastname"] + ", " + udic["firstname"]
 
-@app.route('/static/<path:path>', methods=['GET'])
+
+def get_class_student_home_actions(username, class_):
+    html = '<span class="classStudentHomeActions">'
+    html += '<a href="/deregister/%s">Deregister</a>' % class_["cid"]
+    html += '</span>'
+    
+    return Markup(html)
+
+
+def get_display_learning_classes(username: str):
+    return [
+        (
+            class_["subject"],
+            get_lastfirstmiddle(class_["mentors"][0]),
+            class_["cid"],
+            class_["time_desc"],
+            get_class_student_home_actions(username, class_),
+        )
+        for class_ in classdb
+        if username in class_["mentees"]
+    ]
+
+
+def get_display_teaching_classes(username: str):
+    classes = [class_ for class_ in classdb if username in class_["mentors"]]
+    return "Hi"
+
+
+@app.route("/static/<path:path>", methods=["GET"])
 def static_(path: str):
     return send_from_directory("static", path)
 
-@app.route('/', methods=['GET'])
+@app.route("/deregister/<cid>", methods=["GET"])
+def deregister(cid):
+    username = check_cookie(request.cookies.get("session-id"))
+    if not username:
+        return redirect("/login")
+    udic = get_udic(username)
+    try:
+        get_cdic(cid)["mentees"].remove(username)
+    except ValueError:
+        return "You are not in this section, you can't deregister from it!"
+    else:
+        return "Done!"
+
+@app.route("/", methods=["GET"])
 def index():
     username = check_cookie(request.cookies.get("session-id"))
     if not username:
-        return redirect('/login')
+        return redirect("/login")
     udic = get_udic(username)
     # TODO
     return render_template(
-                                'index.html',
-                                lastfirstmiddle=get_lastfirstmiddle(username),
-                          )
+        "index.html",
+        lastfirstmiddle=get_lastfirstmiddle(username),
+        display_learning_classes=get_display_learning_classes(username),
+    )
 
-@app.route('/login', methods=['GET', 'POST'])
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         username = check_cookie(request.cookies.get("session-id"))
         if username:
-            return render_template('login.html', note=f'Note: You are already logged in as "{username}". Only submit this form to login as another user.')
-        return render_template('login.html')
+            return render_template(
+                "login.html",
+                note=f'Note: You are already logged in as "{username}". Only submit this form to login as another user.',
+            )
+        return render_template("login.html")
     if not ("username" in request.form and "password" in request.form):
-        return render_template("login.html", note='Error: Your request does not include the required fields "username" and "password".')
+        return render_template(
+            "login.html",
+            note='Error: Your request does not include the required fields "username" and "password".',
+        )
     if not check_login(request.form["username"], request.form["password"]):
-        return render_template("login.html", note='Error: Invalid credentials.')
+        return render_template("login.html", note="Error: Invalid credentials.")
     username = request.form["username"]
     session_id = token_urlsafe(64)
     add_cookie(username, session_id)
-    response = make_response(redirect('/'))
-    response.set_cookie('session-id', session_id)
+    response = make_response(redirect("/"))
+    response.set_cookie("session-id", session_id)
     return response
 
 
@@ -151,4 +232,7 @@ if __name__ == "__main__":
     try:
         app.run(port=8000, debug=True)
     finally:
+        print("This should only occur once!")
+        print(classdb)
         write_udb()
+        write_cdb()

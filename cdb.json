@@ -1,14 +1,24 @@
 [
 	{
-		"cid": "8c5523cf-4200-4e6e-87a6-732cdec9a179",
-		"subject": "10 Economics 经济",
-		"mentors": ["b38adf61-5e7d-4835-812f-364559dba4d4"],
-		"mentees": ["84e3ff59-8e6c-45b7-980d-9ea914ce9e73"]
+		"cid": "1",
+		"subject": "10 Economics \u7ecf\u6d4e",
+		"mentors": [
+			"s22537"
+		],
+		"mentees": [
+			"s14003"
+		],
+		"time_desc": "M"
 	},
 	{
-		"cid": "5f5ede02-fbe1-4504-940a-1050182139a8",
-		"subject": "10 History 历史",
-		"mentors": ["84e3ff59-8e6c-45b7-980d-9ea914ce9e73"],
-		"mentees": ["b38adf61-5e7d-4835-812f-364559dba4d4"]
+		"cid": "2",
+		"subject": "10 History \u5386\u53f2",
+		"mentors": [
+			"s14003"
+		],
+		"mentees": [
+			"s22537"
+		],
+		"time_desc": "M"
 	}
 ]
