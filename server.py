@@ -33,8 +33,12 @@ from time import time
 from hashlib import sha512
 from secrets import token_urlsafe
 import json
+import sqlite3
+
 
 app = Flask(__name__)
+conn = sqlite3.connect("db1.db")
+cur = conn.cursor()
 
 
 global userdb
@@ -42,45 +46,57 @@ global classdb
 
 
 def read_cdb() -> None:
+    cdb = []
     try:
-        dbfile = open("cdb.json", "r")
-    except FileNotFoundError:
-        cdb = []
-    else:
-        cdb = json.load(dbfile)
-        assert type(cdb) is list
-    finally:
-        dbfile.close()
+        sql_search = "SELECT * FROM cdb"
+        cur.execute(sql_search)
+        results = cur.fetchall()
+        for result in results: 
+            cdb.append({"cid": str(result[0])})
+            json_content = json.loads(result[1].replace("'", '"'))
+            cdb[-1].update(json_content)
+    except BaseException as e: 
+        print(e)
     return cdb
 
 
 def write_cdb() -> None:
     try:
-        dbfile = open("cdb.json", "w")
-        json.dump(classdb, dbfile, indent="\t")
-    finally:
-        dbfile.close()
+        cur.execute("DELETE FROM cdb")
+        for entry in classdb: 
+            cid = int(entry.pop("cid"))
+            sql_insert = "INSERT INTO cdb VALUES(" + str(cid) + ', "' + str(entry) + '")'
+            cur.execute(sql_insert)
+        conn.commit()
+    except BaseException as e: 
+        print(e)
 
 
 def read_udb() -> None:
+    udb = []
     try:
-        dbfile = open("udb.json", "r")
-    except FileNotFoundError:
-        udb = []
-    else:
-        udb = json.load(dbfile)
-        assert type(udb) is list
-    finally:
-        dbfile.close()
+        sql_search = "SELECT * FROM udb"
+        cur.execute(sql_search)
+        results = cur.fetchall()
+        for result in results: 
+            udb.append({"username": "s" + str(result[0])})
+            json_content = json.loads(result[1].replace("'", '"'))
+            udb[-1].update(json_content)
+    except BaseException as e: 
+        print(e)
     return udb
 
 
 def write_udb() -> None:
     try:
-        dbfile = open("udb.json", "w")
-        json.dump(userdb, dbfile, indent="\t")
-    finally:
-        dbfile.close()
+        cur.execute("DELETE FROM udb")
+        for entry in userdb: 
+            username = int(entry.pop("username")[1:])
+            sql_insert = "INSERT INTO udb VALUES(" + str(username) + ', "' + str(entry) + '")'
+            cur.execute(sql_insert)
+        conn.commit()
+    except BaseException as e: 
+        print(e)
 
 
 userdb = read_udb()
@@ -295,3 +311,4 @@ if __name__ == "__main__":
         print(classdb)
         write_udb()
         write_cdb()
+
