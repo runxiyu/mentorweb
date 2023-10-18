@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2023  Runxi Yu <a@andrewyu.org>
+# Copyright (C) 2023  Runxi Yu   <s22537@ykpaoschool.cn>
+# Copyright (C) 2023  Albert Tan <s22505@ykpaoschool.cn>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
