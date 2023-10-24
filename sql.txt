@@ -1,0 +1,2 @@
+UPDATE table SET column_1 = new_value_1, column_2 = new_value_2 WHERE search_condition LIMIT row_count;
+ALTER TABLE table ADD COLUMN column type type type type;

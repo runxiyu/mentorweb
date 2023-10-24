@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Pao Mentoring</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header>
+	<header>
+		<h1>
+			Pao Mentoring: {{lastname}}, {{firstname}} ({{middlename}})
+		</h1>
+	</header>
+	<h2>
+		Learning Courses:
+	</h2>
+	{% if learning_classes %}
+			<table>
+			<tr>
+				<th>Subject</th>
+				<th>Primary Mentor</th>
+				<th>Section #</th>
+				<th>Time</th>
+				<th>Actions</th>
+			</tr>
+			{% for learning_class in learning_classes %}
+				<tr>
+					<td>{{ learning_class[0] }}</td>
+					<td>{{ learning_class[1] }}</td>
+					<td>{{ learning_class[2] }}</td>
+					<td>{{ learning_class[3] }}</td>
+					<td>
+						<form method="POST">
+							<input type="hidden" name="action" value="deregister" />
+							<input type="hidden" name="classid" value="{{ learning_class[2] }}" />
+							<input type="submit" value="Deregister" name="Deregister">
+						</form> 
+						<a href="/view-as-student/{{ learning_class[4] }}">
+						<button>View</button>
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+			</table>
+	{% else %}
+		You have no learning classes.
+	{% endif %}
+
+	<!-- teaching and available -->
+
+</body>
+</html>

@@ -1,13 +1,10 @@
 import sqlite3
 
-conn = sqlite3.connect("database_1.db")
+conn = sqlite3.connect("udb.db")
 cur = conn.cursor()
 
-sql_create_udb = "CREATE TABLE udb (username INTEGER PRIMARY KEY NOT NULL, data TEXT)"
+sql_create_udb = "CREATE TABLE students (username STRING PRIMARY KEY NOT NULL, lastname TEXT, firstname TEXT, middlename TEXT)"
 cur.execute(sql_create_udb)
-
-sql_create_cdb = "CREATE TABLE cdb (cid INTEGER PRIMARY KEY NOT NULL, data TEXT)"
-cur.execute(sql_create_cdb)
 
 cdb_1 = {
 	"subject": "10 Economics \u7ecf\u6d4e",
@@ -39,8 +36,9 @@ cdb_3 = {
 	],
 	"time_desc": "M"
 }
+
 udb_1 = {
-	"email": "s22537@ykpaoschool.cn",
+	"username": "s22537",
 	"salt": "b38adf61-5e7d-4835-812f-364559dba4d4",
 	"password": "936d6f62ed697a935e8a1b9808f26f63018e5c7c54ec1a873aa3457a78f905160b8b74df9cc270e8b652a51d31469eefc41a48e001a5dbe94cbb451c8c6149f4",
 	"cookies": [
