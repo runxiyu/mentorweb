@@ -26,7 +26,7 @@
 			{% for learning_class in learning_classes %}
 				<tr>
 					<td>{{ learning_class[0] }}</td>
-					<td>{{ learning_class[1] }}</td>
+					<td>{{ learning_class[1][0] }}, {{ learning_class[1][1] }} ({{ learning_class[1][2] }})</td>
 					<td>{{ learning_class[2] }}</td>
 					<td>{{ learning_class[3] }}</td>
 					<td>
@@ -35,7 +35,7 @@
 							<input type="hidden" name="classid" value="{{ learning_class[2] }}" />
 							<input type="submit" value="Deregister" name="Deregister">
 						</form> 
-						<a href="/view-as-student/{{ learning_class[4] }}">
+						<a href="/view-as-student/{{ learning_class[2] }}">
 						<button>View</button>
 						</a>
 					</td>

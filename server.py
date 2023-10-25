@@ -97,37 +97,45 @@ def record_cookie(loginclass: str, username: str, cookie: str) -> None:
         ucur.close()
         return
     else:
-        return ValueError("duplicate usernames", username)
+        raise ValueError("duplicate usernames", username)
 
 
 @app.route("/static/<path:path>", methods=["GET"])
 def static_(path: str):
     return send_from_directory("static", path)
 
+def get_nametuple(username: str):
+    ucur = ucon.cursor()
+    ucur.execute(
+        "select lastname, firstname, middlename from students where username = ?",
+        (username,),
+    )
+    res = ucur.fetchall()
+    assert len(res) == 1
+    return res[0]
+
 
 # TODO process stuff
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        print(dir(request))
         pass # TODO process stuff
     username = check_cookie(request.cookies.get("session-id"))
     if not username:
         return redirect("/login")
+    lastname, firstname, middlename = get_nametuple(username)
     ucur = ucon.cursor()
-    ucur.execute(
-        "SELECT lastname, firstname, middlename FROM students WHERE username = ?",
-        (username,),
-    )
-    res = ucur.fetchall()
-    assert len(res) == 1
-    lastname, firstname, middlename = res[0]
+    ucur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
+    for cid in [x[0] for x in ucur.fetchall()]:
+        ucur.execute("SELECT subject, primary_mentor, cid, timestring FROM classes WHERE cid = ?", (cid,))
     return render_template(
         "student.html",
         lastname=lastname,
         firstname=firstname,
-        middlename=middlename
+        middlename=middlename,
+        learning_classes=[(course[0], get_nametuple(course[1]), course[2], course[3]) for course in ucur.fetchall()],
     )
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
