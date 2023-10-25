@@ -8,9 +8,16 @@
 <header>
 	<header>
 		<h1>
-			Pao Mentoring: {{lastname}}, {{firstname}} ({{middlename}})
+			Pao Mentoring: {{nametuple[0]}}, {{nametuple[1]}} ({{nametuple[2]}})
 		</h1>
 	</header>
+	{% if sysmsgs %}
+	<div id="sysmsgs">
+	{% for sysmsg in notices %}
+	{{ sysmsg }}<br />
+	{% endfor %}
+	</div>
+	{% endif %}
 	<h2>
 		Learning Courses:
 	</h2>
@@ -35,7 +42,7 @@
 							<input type="hidden" name="classid" value="{{ learning_class[2] }}" />
 							<input type="submit" value="Deregister" name="Deregister">
 						</form> 
-						<a href="/view-as-student/{{ learning_class[2] }}">
+						<a href="/courseview/{{ learning_class[2] }}">
 						<button>View</button>
 						</a>
 					</td>
