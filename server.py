@@ -115,27 +115,72 @@ def get_nametuple(username: str):
     return res[0]
 
 
-# TODO process stuff
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        print(dir(request))
-        pass # TODO process stuff
+@app.route("/courseview/<cid>", methods=["GET", "POST"])
+def courseview(cid):
+    sysmsgs = []
+    ucur = ucon.cursor()
     username = check_cookie(request.cookies.get("session-id"))
     if not username:
         return redirect("/login")
-    lastname, firstname, middlename = get_nametuple(username)
+    if request.method == "POST":
+        try:
+            if request.form["action"] == "register":
+                # TODO: Check if the course exists first, to avoid cluttering the database
+                ucur.execute("INSERT INTO mentees VALUES ( ? , ? )", (username, cid))
+                sysmsgs.append("You have successfully registered in this section.")
+            else:
+                return "stop haxing the requests thanks"
+        except KeyError:
+            raise
+        pass
+    nametuple = get_nametuple(username)
+    ucur.execute("SELECT subject, primary_mentor, cid, timestring, description FROM classes WHERE cid = ?", (cid,))
+    res = ucur.fetchall()
+    assert len(res) == 1
+    subject, primary_mentor, cid, timestring, description = res[0]
+    # TODOTODO
+    ucur.execute("SELECT username FROM mentees WHERE cid = ?", (cid,))
+    mentees = [x[0] for x in ucur.fetchall()]
+    return render_template(
+        "courseview.html",
+        nametuple=nametuple,
+        subject=subject,
+        primary_mentor=get_nametuple(primary_mentor) + tuple([primary_mentor]),
+        mentees=[(get_nametuple(mentee) + tuple([mentee])) for mentee in mentees],
+        cid=cid,
+        timestring = timestring,
+        description=description,
+        sysmsgs=sysmsgs,)
+@app.route("/", methods=["GET", "POST"])
+def index():
+    sysmsgs = []
     ucur = ucon.cursor()
+    username = check_cookie(request.cookies.get("session-id"))
+    if not username:
+        return redirect("/login")
+    if request.method == "POST":
+        try:
+            if request.form["action"] == "deregister":
+                ucur.execute("DELETE FROM mentees WHERE username = ? AND cid = ?", (username, request.form["classid"],))
+                if not ucur.rowcount:
+                    sysmsgs.append("Deregister failed: You are not registered in section %s" % request.form["classid"])
+                else:
+                    sysmsgs.append("You have deregistered from section %s" % request.form["classid"])
+            else:
+                return "stop haxing the requests thanks"
+        except KeyError:
+            raise
+        pass # TODO process stuff
+    nametuple = get_nametuple(username)
     ucur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
     for cid in [x[0] for x in ucur.fetchall()]:
         ucur.execute("SELECT subject, primary_mentor, cid, timestring FROM classes WHERE cid = ?", (cid,))
     return render_template(
         "student.html",
-        lastname=lastname,
-        firstname=firstname,
-        middlename=middlename,
-        learning_classes=[(course[0], get_nametuple(course[1]), course[2], course[3]) for course in ucur.fetchall()],
-    )
+        nametuple=nametuple,
+        learning_classes=[(course[0], get_nametuple(course[1]), course[2],
+                           course[3]) for course in ucur.fetchall()],
+        sysmsgs=sysmsgs,)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

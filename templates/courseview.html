@@ -20,18 +20,16 @@
 	{% endif %}
 
 	<h2>{{ subject }}</h2>
-	<p>Primary mentor: {{ primary_mentor }}</p>
-	<p>Mentees: {% for mentee_nametuple in mentee_nametuples %}}</p>
+	<p>Primary mentor: <a href="mailto:{{primary_mentor[3]}}@ykpaoschool.cn">{{ primary_mentor[0] }}, {{primary_mentor[1]}} ({{primary_mentor[2]}})</a></p>
+	<p>When: {{timestring}}</p>
+	<p>Section #: {{cid}}</p>
+	<p>Mentees: {% for i in mentees %} <a href="mailto:{{i[3]}}@stu.ykpaoschool.cn">{{i[0]}}, {{i[1]}} ({{i[2]}})</a>; {% endfor %}</p>
 
 	<form action="/" method="post">
 		<input type="hidden" name="action" value="deregister" />
-		<input type="hidden" name="classid" value="{{ learning_class[2] }}" />
-		<input type="submit" value="deregister" name="deregister">
+		<input type="hidden" name="classid" value="{{ cid }}" />
+		<input type="submit" value="Deregister" />
 	</form> 
 
-	<td>{{ learning_class[0] }}</td>
-	<td>{{ learning_class[1][0] }}, {{ learning_class[1][1] }} ({{ learning_class[1][2] }})</td>
-	<td>{{ learning_class[2] }}</td>
-	<td>{{ learning_class[3] }}</td>
 </body>
 </html>

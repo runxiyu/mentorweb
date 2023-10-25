@@ -37,11 +37,6 @@
 					<td>{{ learning_class[2] }}</td>
 					<td>{{ learning_class[3] }}</td>
 					<td>
-						<form method="POST">
-							<input type="hidden" name="action" value="deregister" />
-							<input type="hidden" name="classid" value="{{ learning_class[2] }}" />
-							<input type="submit" value="Deregister" name="Deregister">
-						</form> 
 						<a href="/courseview/{{ learning_class[2] }}">
 						<button>View</button>
 						</a>
