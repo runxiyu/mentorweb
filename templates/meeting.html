@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Pao Mentoring</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header>
+	<header>
+		<h1>
+			Pao Mentoring: {{nametuple[0]}}, {{nametuple[1]}} {{nametuple[2]}}
+		</h1>
+	</header>
+	{% if sysmsgs %}
+	<div id="sysmsgs">
+	{% for sysmsg in sysmsgs %}
+	{{ sysmsg }}<br />
+	{% endfor %}
+	</div>
+	{% endif %}
+
+	{% if role == 'bad' %}
+	<div id="bad">
+		Either this meeting does not exist, or you don't have permission to view this meeting.
+	</div>
+
+
+
+
+
+	{% elif role == 'mentor' %}
+	<p>
+	You have scheduled this meeting as a mentor.
+	</p>
+	<p>
+	Mentee: <a href="mailto:{{ mentee_nametuple[3] }}@ykpaoschool.cn">{{ mentee_nametuple[0] }}, {{ mentee_nametuple[1] }} {{ mentee_nametuple[2] }}</a>
+	</p>
+	<div id="deregister-meeting">
+	<form action="/" method="post">
+		<input type="hidden" name="action" value="deregister_meeting" />
+		<input type="hidden" name="classid" value="{{ mid }}" />
+		<input type="submit" value="Deregister Meeting" />
+	</form> 
+	</div>
+
+
+
+	{% elif role == 'mentee' %}
+	<div id="deregister-meeting">
+	<form action="/" method="post">
+		<input type="hidden" name="action" value="deregister_meeting" />
+		<input type="hidden" name="classid" value="{{ mid }}" />
+		<label for="reason">Reason</label>
+		<textarea name="reason" rows="4" wrap="soft" />
+		<input type="submit" value="Deregister Meeting" />
+	</form> 
+	</div>
+	{% else %}
+	<div id="syserr">
+		Programming error: "role" is given an unexpected value.
+	</div>
+	{% endif %}
+
+	<!--
+	<h2>{{ subject }}</h2>
+	<p>Primary mentor: <a href="mailto:{{primary_mentor[3]}}@ykpaoschool.cn">{{ primary_mentor[0] }}, {{primary_mentor[1]}} ({{primary_mentor[2]}})</a></p>
+	<p>When: {{timestring}}</p>
+	<p>Section #: {{cid}}</p>
+	<p>Mentees: {% for i in mentees %} <a href="mailto:{{i[3]}}@stu.ykpaoschool.cn">{{i[0]}}, {{i[1]}} ({{i[2]}})</a>; {% endfor %}</p>
+	<p>Description: {{ description }}</p>
+
+	-->
+
+
+</body>
+</html>
