@@ -11,10 +11,10 @@
 			Pao Mentoring: {{nametuple[0]}}, {{nametuple[1]}} ({{nametuple[2]}})
 		</h1>
 	</header>
-	{% if sysmsgs %}
-	<div id="sysmsgs">
-	{% for sysmsg in notices %}
-	{{ sysmsg }}<br />
+	{% if snotes %}
+	<div id="snotes">
+	{% for snote in notices %}
+	{{ snote }}<br />
 	{% endfor %}
 	</div>
 	{% endif %}

@@ -10,10 +10,10 @@
 	<h1>Pao Mentoring: {{lfmu[0]}}, {{lfmu[1]}} {{lfmu[2]}}</h1>
 </header>
 
-{% if sysmsgs %}
-<div id="sysmsgs">
-{% for sysmsg in sysmsgs %}
-{{ sysmsg }}<br />
+{% if snotes %}
+<div id="snotes">
+{% for snote in snotes %}
+{{ snote }}<br />
 {% endfor %}
 </div>
 {% endif %}
@@ -29,6 +29,7 @@ You are currently registered for expertise in {{ subjects }}. <a href="/expertis
 </p>
 
 <form action="/enlist" method="post">
+	<input type="hidden" name="mode" value="confirm" />
 	<label for="date">Date</label>
 	<input type="date" name="date">
 	<br />
@@ -41,14 +42,50 @@ You are currently registered for expertise in {{ subjects }}. <a href="/expertis
 	<label for="notes">Notes</label>
 	<textarea name="notes" rows="4" wrap="soft"></textarea>
 	<br />
+	<input type="submit" value="Proceed" />
+</form> 
+
+{% elif mode == "confirm" %}
+
+<p>
+Please confirm that the following information is correct. If it is not, press the "back" button in your browser. If it is, press "Enlist" at the bottom.
+</p>
+
+<p>
+Start:
+{{starts}}
+</p>
+<p>
+End:
+{{ends}}
+</p>
+
+<form action="/enlist" method="post">
+	<input type="hidden" name="mode" value="confirmed" />
+	<input type="hidden" name="start" value="{{start}}" />
+	<input type="hidden" name="end" value="{{end}}" />
+	<input type="hidden" name="notes" value="{{notes}}" />
 	<input type="submit" value="Enlist" />
 </form> 
 
 {% elif mode == "confirmed" %}
 
+<p>
+You have confirmed that you have time to perform mentoring activities during the following period. I will add this block onto your calendar to remind you to keep it free, and I'll email you if someone registers.
+</p>
+
+<p>
+Start:
+{{starts}}
+</p>
+<p>
+End:
+{{ends}}
+</p>
+
 {% else %}
 
-what
+Now I think the code is broken :) :) :)
 
 {% endif %}
 

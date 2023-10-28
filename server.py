@@ -18,8 +18,9 @@
 #
 # BUGS
 # Time-based side-channel attacks are possible.
-# 
+#
 # TODOS
+# Test for time overlaps.
 # Redirect to login page, but allow coming back somehow? Perhaps a Referrer header.
 
 from __future__ import annotations
@@ -62,9 +63,9 @@ class DatabaseFault(GeneralFault):
 
 def check_login(username: str, password: str) -> None:
     try:
-        target = con.execute("SELECT argon2 FROM users WHERE username = ?", (username,)).fetchall()[
-            0
-        ][0]
+        target = con.execute(
+            "SELECT argon2 FROM users WHERE username = ?", (username,)
+        ).fetchall()[0][0]
         assert type(target) is str
     except IndexError:
         raise AuthenticationFault("username", username)
@@ -83,7 +84,9 @@ def check_cookie(cookie: Optional[str]) -> str:
         "SELECT username, cookietime FROM users WHERE cookie = ?", (cookie,)
     ).fetchall()
     if len(res) > 1:
-        raise ValueError("database contains multiple entries of the same cookie", cookie)
+        raise ValueError(
+            "database contains multiple entries of the same cookie", cookie
+        )
     elif len(res) == 1:
         username, cookietime = res[0]
         assert type(username) is str
@@ -132,7 +135,7 @@ def get_lfmu(username: str) -> Tuple[str, str, str, str]:
             if request.form["action"] == "register":
                 # TODO: Check if the course exists first, to avoid cluttering the database
                 cur.execute("INSERT INTO mentees VALUES (?, ?)", (username, cid))
-                sysmsgs.append("You have successfully registered in this section.")
+                snotes.append("You have successfully registered in this section.")
             else:
                 return "stop haxing the requests thanks"
         except KeyError:
@@ -143,7 +146,7 @@ def get_lfmu(username: str) -> Tuple[str, str, str, str]:
 
 @app.route("/meeting/<mid>", methods=["GET", "POST"])
 def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
-    sysmsgs: List[Union[str, Markup]] = []
+    snotes: List[Union[str, Markup]] = []
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -156,20 +159,20 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     ).fetchall()
     assert len(res) <= 1
     if len(res) == 0:  # meeting does not exist
-        return render_template("meeting.html", role="bad", sysmsgs=sysmsgs, lfmu=lfmu)
+        return render_template("meeting.html", role="bad", snotes=snotes, lfmu=lfmu)
     cid, subject, mentor, mentee, time_start, time_end, description = res[0]
     if username == mentor:
-        role="mentor"
+        role = "mentor"
         other_lfmu = get_lfmu(mentee)
     elif username == mentee:
-        role="mentee"
+        role = "mentee"
         other_lfmu = get_lfmu(mentor)
     else:  # user is not related to the meeting
         return render_template(
             "meeting.html",
             role="bad",
             lfmu=lfmu,
-            sysmsgs=sysmsgs,
+            snotes=snotes,
         )
     return render_template(
         "meeting.html",
@@ -177,12 +180,11 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
         role=role,
         lfmu=lfmu,
         other_lfmu=other_lfmu,
-        time_start=None, # TODO
-        time_end=None, # TODO
+        time_start=None,  # TODO
+        time_end=None,  # TODO
         description=description,
-        sysmsgs=sysmsgs,
+        snotes=snotes,
     )
-
 
 
 @app.route("/calendar/<username>.ics")
@@ -193,9 +195,10 @@ def calendar(username: str) -> Response:
     response.headers["Content-Disposition"] = "attachment; filename=calendar.ics"
     return response
 
+
 @app.route("/expertise")
-def expertise() -> Union[Response, werkzeugResponse]:
-    sysmsgs: List[Union[str, Markup]] = []
+def expertise() -> Union[Response, werkzeugResponse, str]:
+    snotes: List[Union[str, Markup]] = []
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -203,22 +206,51 @@ def expertise() -> Union[Response, werkzeugResponse]:
     lfmu = get_lfmu(username)
     return Response()
 
+
 @app.route("/enlist", methods=["GET", "POST"])
 def enlist() -> Union[Response, werkzeugResponse, str]:
-    sysmsgs: List[Union[str, Markup]] = []
+    snotes: List[Union[str, Markup]] = []
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
         return redirect("/login")
     lfmu = get_lfmu(username)
     if request.method == "POST":
-        # mode = "confirmed"
-        return Response(repr(request.form["date"]) + ";" + repr(request.form["start"]) + ";" + repr(request.form["end"]) + ";" + repr(request.form["notes"]))
-    return render_template("enlist.html", lfmu=lfmu, mode="fill")
+        try:
+            print(request.form)
+            if "date" not in request.form:
+                date = ""
+            else:
+                date = request.form["date"] + " "
+            start = datetime.strptime(date +  request.form["start"], "%Y-%m-%d %H:%M")
+            end = datetime.strptime(date +  request.form["end"], "%Y-%m-%d %H:%M")
+        except ValueError:
+            snotes.append("Your previous submission was rejected because the date or time formats were unreadable.")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+        except KeyError:
+            snotes.append("Your previous submission was rejected because the request did not contain the necessary fields.")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+        if end.timestamp() <= start.timestamp():
+            snotes.append("Your previous submission was rejected because the end time is earlier than the start time. Butter fingers! I still don't want to use JavaScript, sue me.")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+        if request.form["mode"] == "confirm":
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="confirm", start=start.strftime("%Y-%m-%d %H:%M"), end=end.strftime("%Y-%m-%d %H:%M"), starts=start.strftime("%c"), ends=end.strftime("%c"), notes=request.form["notes"])
+        elif request.form["mode"] == "confirmed":
+            tstart = int(start.timestamp())
+            tend = int(end.timestamp())
+            notes=""
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="confirmed", starts=start.strftime("%c"), ends=end.strftime("%c"), notes=request.form["notes"])
+        else:
+            snotes.append("Why was this even in a POST request?")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+    elif request.method == "GET":
+        return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+    else:
+        raise GeneralFault()
 
 # @app.route("/", methods=["GET", "POST"])
 # def index():
-#     sysmsgs = []
+#     snotes = []
 #     cur = con.cursor()
 #     username = check_cookie(request.cookies.get("session-id"))
 #     if not username:
@@ -234,12 +266,12 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
 #                     ),
 #                 )
 #                 if not cur.rowcount:
-#                     sysmsgs.append(
+#                     snotes.append(
 #                         "Deregister failed: You are not registered in section %s"
 #                         % request.form["classid"]
 #                     )
 #                 else:
-#                     sysmsgs.append(
+#                     snotes.append(
 #                         "You have deregistered from section %s" % request.form["classid"]
 #                     )
 #             else:
@@ -273,10 +305,11 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
 #         lfmu=lfmu,
 #         learning_meetings=learning_classes,
 #         available_classes=available_classes,
-#         sysmsgs=sysmsgs,
+#         snotes=snotes,
 #     )
 #
 #
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login() -> Union[Response, werkzeugResponse, str]:
@@ -312,4 +345,4 @@ if __name__ == "__main__":
         app.run(port=8000, debug=True)
     finally:
         pass
-       # close database
+    # close database
