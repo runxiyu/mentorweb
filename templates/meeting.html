@@ -11,8 +11,6 @@
 </header>
 
 
-
-
 {% if snotes %}
 <div id="snotes">
 {% for snote in snotes %}
@@ -62,14 +60,18 @@ Mentor: <a href="mailto:{{ other_lfmu[3] }}@ykpaoschool.cn">{{ other_lfmu[0] }},
 Description: {% if notes %} {{ notes }} {% else %} None {% endif %}
 </p>
 <p>
-Time: {{ time }}
+Start: {{ time_start }}
+</p>
+<p>
+End: {{ time_end }}
 </p>
 <div id="deregister-meeting">
+<h2>Deregister</h2>
 <form action="/" method="post">
 	<input type="hidden" name="action" value="deregister_meeting" />
 	<input type="hidden" name="mid" value="{{ mid }}" />
-	<label for="reason">Reason</label>
-	<textarea name="reason" rows="4" wrap="soft"></textarea>
+	<label for="reason">Reason</label><br />
+	<textarea name="reason" rows="4" wrap="soft"></textarea><br />
 	<input type="submit" value="Deregister Meeting" />
 </form> 
 </div>

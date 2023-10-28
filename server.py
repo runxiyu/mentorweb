@@ -183,6 +183,7 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
         "meeting.html",
         role=role,
         lfmu=lfmu,
+        mid=mid,
         other_lfmu=other_lfmu,
         time_start=datetime.fromtimestamp(time_start).strftime("%c"),
         time_end=datetime.fromtimestamp(time_end).strftime("%c"),
@@ -292,23 +293,27 @@ def index() -> Union[str, Response, werkzeugResponse]:
     if request.method == "POST":
         try:
             if request.form["action"] == "deregister_meeting":
-                mentor, mentee = con.execute("SELECT mentor, mentee FROM meetings WHERE mid = ?", (request.form["mid"])).fetchall()[0]
-                if username == mentor:
-                    assert con.execute("DELETE FROM meetings WHERE mid = ?", (request.form["mid"],),).rowcount == 1
-                    snotes.append(
-                        "You have deregistered from, and deleted, meeting %s" % request.form["mid"]
-                    )
-                    # somehow notify mentee with request.form["reason"]
-                elif username == mentee:
-                    assert con.execute("UPDATE meetings SET mentee = \"\" WHERE mid = ?", (request.form["mid"],),).rowcount == 1
-                    snotes.append(
-                        "You have deregistered from meeting %s" % request.form["mid"]
-                    )
-                    # somehow notify mentor with request.form["reason"]
+                res = con.execute("SELECT mentor, mentee FROM meetings WHERE mid = ?", (request.form["mid"])).fetchall()
+                if len(res) != 1:
+                    snotes.append("You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions" % request.form["mid"])
                 else:
-                    snotes.append(
-                        "You tried to deregister from meeting %s but it doesn't even exist" % request.form["mid"]
-                    )
+                    mentor, mentee = res[0]
+                    if username == mentor:
+                        assert con.execute("DELETE FROM meetings WHERE mid = ?", (request.form["mid"],),).rowcount == 1
+                        con.commit()
+                        snotes.append(
+                            "You have deregistered from, and deleted, meeting %s" % request.form["mid"]
+                        )
+                        # somehow notify mentee with request.form["reason"]
+                    elif username == mentee:
+                        assert con.execute("UPDATE meetings SET mentee = \"\" WHERE mid = ?", (request.form["mid"],),).rowcount == 1
+                        con.commit()
+                        snotes.append(
+                            "You have deregistered from meeting %s" % request.form["mid"]
+                        )
+                        # somehow notify mentor with request.form["reason"]
+                    else:
+                        snotes.append("You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions" % request.form["mid"])
             else:
                 return "stop haxing the requests thanks"
         except KeyError:
@@ -319,6 +324,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
     meetings_as_mentee = [(i[0], get_lfmu(i[1]), datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentor, time_start FROM meetings WHERE mentee = ?", (username,)).fetchall()]
 
     meetings_as_mentor = [(i[0], get_lfmu(i[1]) if i[1] else null_lfmu, datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?", (username,)).fetchall()]
+
 
     # TODO
     return render_template(
