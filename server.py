@@ -238,7 +238,7 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
         elif request.form["mode"] == "confirmed":
             tstart = int(start.timestamp())
             tend = int(end.timestamp())
-            notes=""
+            notes =  ""
             return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="confirmed", starts=start.strftime("%c"), ends=end.strftime("%c"), notes=request.form["notes"])
         else:
             snotes.append("Why was this even in a POST request?")
