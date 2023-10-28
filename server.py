@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Copyright (C) 2023  Runxi Yu <a@andrewyu.org>
 # Blue passes for YK Pao School
@@ -153,14 +153,18 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
         return redirect("/login")
     lfmu = get_lfmu(username)
 
+    try:
+        intmid = int(mid)
+    except ValueError:
+        raise # TODO
     res = con.execute(
-        "SELECT mid, subject, mentor, mentee, time_start, time_end, description FROM meetings WHERE mid = ?",
-        (mid,),
+        "SELECT mentor, mentee, time_start, time_end, description FROM meetings WHERE mid = ?",
+        (intmid,),
     ).fetchall()
     assert len(res) <= 1
     if len(res) == 0:  # meeting does not exist
         return render_template("meeting.html", role="bad", snotes=snotes, lfmu=lfmu)
-    cid, subject, mentor, mentee, time_start, time_end, description = res[0]
+    mentor, mentee, time_start, time_end, description = res[0]
     if username == mentor:
         role = "mentor"
         other_lfmu = get_lfmu(mentee)
@@ -176,12 +180,11 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
         )
     return render_template(
         "meeting.html",
-        subject=subject,
         role=role,
         lfmu=lfmu,
         other_lfmu=other_lfmu,
-        time_start=None,  # TODO
-        time_end=None,  # TODO
+        time_start=datetime.fromtimestamp(time_start).strftime("%c"),
+        time_end=datetime.fromtimestamp(time_end).strftime("%c"),
         description=description,
         snotes=snotes,
     )
@@ -216,37 +219,67 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
         return redirect("/login")
     lfmu = get_lfmu(username)
     if request.method == "POST":
+        # clean this part up a bit when you get to do so. pass unix timestamps around, not weird strings.
         try:
             print(request.form)
             if "date" not in request.form:
                 date = ""
             else:
                 date = request.form["date"] + " "
-            start = datetime.strptime(date +  request.form["start"], "%Y-%m-%d %H:%M")
-            end = datetime.strptime(date +  request.form["end"], "%Y-%m-%d %H:%M")
+            start = datetime.strptime(date + request.form["start"], "%Y-%m-%d %H:%M")
+            end = datetime.strptime(date + request.form["end"], "%Y-%m-%d %H:%M")
         except ValueError:
-            snotes.append("Your previous submission was rejected because the date or time formats were unreadable.")
+            snotes.append(
+                "Your previous submission was rejected because the date or time formats were unreadable."
+            )
             return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
         except KeyError:
-            snotes.append("Your previous submission was rejected because the request did not contain the necessary fields.")
+            snotes.append(
+                "Your previous submission was rejected because the request did not contain the necessary fields."
+            )
             return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
         if end.timestamp() <= start.timestamp():
-            snotes.append("Your previous submission was rejected because the end time is earlier than the start time. Butter fingers! I still don't want to use JavaScript, sue me.")
+            snotes.append(
+                "Your previous submission was rejected because the end time is earlier than the start time. Butter fingers! I still don't want to use JavaScript, sue me."
+            )
             return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
         if request.form["mode"] == "confirm":
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="confirm", start=start.strftime("%Y-%m-%d %H:%M"), end=end.strftime("%Y-%m-%d %H:%M"), starts=start.strftime("%c"), ends=end.strftime("%c"), notes=request.form["notes"])
+            return render_template(
+                "enlist.html",
+                lfmu=lfmu,
+                snotes=snotes,
+                mode="confirm",
+                start=start.strftime("%Y-%m-%d %H:%M"),
+                end=end.strftime("%Y-%m-%d %H:%M"),
+                starts=start.strftime("%c"),
+                ends=end.strftime("%c"),
+                notes=request.form["notes"],
+            )
         elif request.form["mode"] == "confirmed":
             tstart = int(start.timestamp())
             tend = int(end.timestamp())
-            notes =  ""
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="confirmed", starts=start.strftime("%c"), ends=end.strftime("%c"), notes=request.form["notes"])
+            notes = request.form["notes"]
+            assert con.execute("INSERT INTO meetings (mentor, time_start, time_end, notes) VALUES (?, ?, ?, ?)", (username, tstart, tend, notes)).rowcount == 1
+            con.commit()
+            return render_template(
+                "enlist.html",
+                lfmu=lfmu,
+                snotes=snotes,
+                mode="confirmed",
+                starts=start.strftime("%c"),
+                ends=end.strftime("%c"),
+                notes=notes
+            )
         else:
-            snotes.append("Why was this even in a POST request?")
+            snotes.append(
+                "Why was this even in a POST request? I'm letting you go this time..."
+            )
             return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
     elif request.method == "GET":
         return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
     else:
         raise GeneralFault()
+
 
 # @app.route("/", methods=["GET", "POST"])
 # def index():
