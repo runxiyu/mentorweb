@@ -47,6 +47,7 @@ import sqlite3
 app = Flask(__name__)
 
 con = sqlite3.connect("yay.db", check_same_thread=False)
+null_lfmu = ("None", "None", "(None)", "none")
 
 
 class GeneralFault(Exception):
@@ -158,16 +159,16 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     except ValueError:
         raise # TODO
     res = con.execute(
-        "SELECT mentor, mentee, time_start, time_end, description FROM meetings WHERE mid = ?",
+        "SELECT mentor, mentee, time_start, time_end, notes FROM meetings WHERE mid = ?",
         (intmid,),
     ).fetchall()
     assert len(res) <= 1
     if len(res) == 0:  # meeting does not exist
         return render_template("meeting.html", role="bad", snotes=snotes, lfmu=lfmu)
-    mentor, mentee, time_start, time_end, description = res[0]
+    mentor, mentee, time_start, time_end, notes = res[0]
     if username == mentor:
         role = "mentor"
-        other_lfmu = get_lfmu(mentee)
+        other_lfmu = get_lfmu(mentee) if mentee else null_lfmu
     elif username == mentee:
         role = "mentee"
         other_lfmu = get_lfmu(mentor)
@@ -185,7 +186,7 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
         other_lfmu=other_lfmu,
         time_start=datetime.fromtimestamp(time_start).strftime("%c"),
         time_end=datetime.fromtimestamp(time_end).strftime("%c"),
-        description=description,
+        notes=notes,
         snotes=snotes,
     )
 
@@ -317,7 +318,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
 
     meetings_as_mentee = [(i[0], get_lfmu(i[1]), datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentor, time_start FROM meetings WHERE mentee = ?", (username,)).fetchall()]
 
-    meetings_as_mentor = [(i[0], get_lfmu(i[1]) if i[1] else ("None", "None", "(None)", "none"), datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?", (username,)).fetchall()]
+    meetings_as_mentor = [(i[0], get_lfmu(i[1]) if i[1] else null_lfmu, datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?", (username,)).fetchall()]
 
     # TODO
     return render_template(
