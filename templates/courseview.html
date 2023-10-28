@@ -24,6 +24,7 @@
 	<p>When: {{timestring}}</p>
 	<p>Section #: {{cid}}</p>
 	<p>Mentees: {% for i in mentees %} <a href="mailto:{{i[3]}}@stu.ykpaoschool.cn">{{i[0]}}, {{i[1]}} ({{i[2]}})</a>; {% endfor %}</p>
+	<p>Description: {{ description }}</p>
 
 	<form action="/" method="post">
 		<input type="hidden" name="action" value="deregister" />

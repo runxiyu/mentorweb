@@ -172,14 +172,23 @@ def index():
             raise
         pass # TODO process stuff
     nametuple = get_nametuple(username)
+
     ucur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
     for cid in [x[0] for x in ucur.fetchall()]:
         ucur.execute("SELECT subject, primary_mentor, cid, timestring FROM classes WHERE cid = ?", (cid,))
+    learning_classes = [(course[0], get_nametuple(course[1]), course[2], course[3]) for course in ucur.fetchall()]
+
+    ucur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
+    for cid in [x[0] for x in ucur.fetchall()]:
+        ucur.execute("SELECT subject, primary_mentor, cid, timestring FROM classes WHERE cid = ?", (cid,))
+    available_classes = []
+
+    # TODO
     return render_template(
         "student.html",
         nametuple=nametuple,
-        learning_classes=[(course[0], get_nametuple(course[1]), course[2],
-                           course[3]) for course in ucur.fetchall()],
+        learning_classes=learning_classes,
+        available_classes=available_classes,
         sysmsgs=sysmsgs,)
 
 @app.route("/login", methods=["GET", "POST"])
