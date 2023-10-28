@@ -115,8 +115,9 @@ def get_nametuple(username: str):
     return res[0]
 
 
-@app.route("/courseview/<cid>", methods=["GET", "POST"])
-def courseview(cid):
+# View meeting as learner
+@app.route("/lmview/<cid>", methods=["GET", "POST"])
+def lmview(cid):
     sysmsgs = []
     ucur = ucon.cursor()
     username = check_cookie(request.cookies.get("session-id"))
@@ -142,7 +143,7 @@ def courseview(cid):
     ucur.execute("SELECT username FROM mentees WHERE cid = ?", (cid,))
     mentees = [x[0] for x in ucur.fetchall()]
     return render_template(
-        "courseview.html",
+        "meetingview.html",
         nametuple=nametuple,
         subject=subject,
         primary_mentor=get_nametuple(primary_mentor) + tuple([primary_mentor]),
@@ -151,6 +152,15 @@ def courseview(cid):
         timestring = timestring,
         description=description,
         sysmsgs=sysmsgs,)
+
+@app.route('/calendar/<username>.ics')
+def calendar(username: str):
+    ical = ""
+    # TODO: Actually generate a calendar
+    response = make_response(ical)
+    response.headers["Content-Disposition"] = "attachment; filename=calendar.ics"
+    return response
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     sysmsgs = []
@@ -187,7 +197,7 @@ def index():
     return render_template(
         "student.html",
         nametuple=nametuple,
-        learning_classes=learning_classes,
+        learning_meetings=learning_classes,
         available_classes=available_classes,
         sysmsgs=sysmsgs,)
 
