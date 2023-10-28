@@ -281,67 +281,54 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
         raise GeneralFault()
 
 
-# @app.route("/", methods=["GET", "POST"])
-# def index():
-#     snotes = []
-#     cur = con.cursor()
-#     username = check_cookie(request.cookies.get("session-id"))
-#     if not username:
-#         return redirect("/login")
-#     if request.method == "POST":
-#         try:
-#             if request.form["action"] == "deregister":
-#                 cur.execute(
-#                     "DELETE FROM mentees WHERE username = ? AND cid = ?",
-#                     (
-#                         username,
-#                         request.form["classid"],
-#                     ),
-#                 )
-#                 if not cur.rowcount:
-#                     snotes.append(
-#                         "Deregister failed: You are not registered in section %s"
-#                         % request.form["classid"]
-#                     )
-#                 else:
-#                     snotes.append(
-#                         "You have deregistered from section %s" % request.form["classid"]
-#                     )
-#             else:
-#                 return "stop haxing the requests thanks"
-#         except KeyError:
-#             raise
-#         pass  # TODO process stuff
-#     lfmu = get_lfmu(username)
-#
-#     cur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
-#     for cid in [x[0] for x in cur.fetchall()]:
-#         cur.execute(
-#             "SELECT subject, primary_mentor, cid, timestring FROM classes WHERE cid = ?",
-#             (cid,),
-#         )
-#     learning_classes = [
-#         (course[0], get_lfmu(course[1]), course[2], course[3]) for course in cur.fetchall()
-#     ]
-#
-#     cur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
-#     for cid in [x[0] for x in cur.fetchall()]:
-#         cur.execute(
-#             "SELECT subject, primary_mentor, cid, timestring FROM classes WHERE cid = ?",
-#             (cid,),
-#         )
-#     available_classes = []
-#
-#     # TODO
-#     return render_template(
-#         "student.html",
-#         lfmu=lfmu,
-#         learning_meetings=learning_classes,
-#         available_classes=available_classes,
-#         snotes=snotes,
-#     )
-#
-#
+@app.route("/", methods=["GET", "POST"])
+def index() -> Union[str, Response, werkzeugResponse]:
+    snotes = []
+    try:
+        username = check_cookie(request.cookies.get("session-id"))
+    except AuthenticationFault:
+        return redirect("/login")
+    if request.method == "POST":
+        try:
+            if request.form["action"] == "deregister_meeting":
+                mentor, mentee = con.execute("SELECT mentor, mentee FROM meetings WHERE mid = ?", (request.form["mid"])).fetchall()[0]
+                if username == mentor:
+                    assert con.execute("DELETE FROM meetings WHERE mid = ?", (request.form["mid"],),).rowcount == 1
+                    snotes.append(
+                        "You have deregistered from, and deleted, meeting %s" % request.form["mid"]
+                    )
+                    # somehow notify mentee with request.form["reason"]
+                elif username == mentee:
+                    assert con.execute("UPDATE meetings SET mentee = \"\" WHERE mid = ?", (request.form["mid"],),).rowcount == 1
+                    snotes.append(
+                        "You have deregistered from meeting %s" % request.form["mid"]
+                    )
+                    # somehow notify mentor with request.form["reason"]
+                else:
+                    snotes.append(
+                        "You tried to deregister from meeting %s but it doesn't even exist" % request.form["mid"]
+                    )
+            else:
+                return "stop haxing the requests thanks"
+        except KeyError:
+            raise
+        pass  # TODO process stuff
+    lfmu = get_lfmu(username)
+
+    meetings_as_mentee = [(i[0], get_lfmu(i[1]), datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentor, time_start FROM meetings WHERE mentee = ?", (username,)).fetchall()]
+
+    meetings_as_mentor = [(i[0], get_lfmu(i[1]) if i[1] else ("None", "None", "(None)", "none"), datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?", (username,)).fetchall()]
+
+    # TODO
+    return render_template(
+        "index.html",
+        lfmu=lfmu,
+        meetings_as_mentee=meetings_as_mentee,
+        meetings_as_mentor=meetings_as_mentor,
+        snotes=snotes,
+    )
+
+
 
 
 @app.route("/login", methods=["GET", "POST"])

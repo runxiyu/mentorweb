@@ -67,7 +67,7 @@ Time: {{ time }}
 <div id="deregister-meeting">
 <form action="/" method="post">
 	<input type="hidden" name="action" value="deregister_meeting" />
-	<input type="hidden" name="classid" value="{{ mid }}" />
+	<input type="hidden" name="mid" value="{{ mid }}" />
 	<label for="reason">Reason</label>
 	<textarea name="reason" rows="4" wrap="soft"></textarea>
 	<input type="submit" value="Deregister Meeting" />
