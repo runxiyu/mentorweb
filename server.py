@@ -16,7 +16,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+# BUGS
 # Time-based side-channel attacks are possible.
+# 
+# TODOS
+# Redirect to login page, but allow coming back somehow? Perhaps a Referrer header.
 
 from __future__ import annotations
 from typing import Union, Optional, Tuple, List
@@ -144,7 +148,7 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
         return redirect("/login")
-    nametuple = get_lfmu(username)
+    lfmu = get_lfmu(username)
 
     res = con.execute(
         "SELECT mid, subject, mentor, mentee, time_start, time_end, description FROM meetings WHERE mid = ?",
@@ -152,55 +156,66 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     ).fetchall()
     assert len(res) <= 1
     if len(res) == 0:  # meeting does not exist
-        return render_template("meeting.html", role="bad", sysmsgs=sysmsgs)
+        return render_template("meeting.html", role="bad", sysmsgs=sysmsgs, lfmu=lfmu)
     cid, subject, mentor, mentee, time_start, time_end, description = res[0]
     if username == mentor:
-        return render_template(
-            "meeting.html",
-            role="mentor",
-            sysmsgs=sysmsgs,
-        )
+        role="mentor"
+        other_lfmu = get_lfmu(mentee)
     elif username == mentee:
-        return render_template(
-            "meeting.html",
-            role="mentee",
-            sysmsgs=sysmsgs,
-        )
+        role="mentee"
+        other_lfmu = get_lfmu(mentor)
     else:  # user is not related to the meeting
         return render_template(
             "meeting.html",
             role="bad",
+            lfmu=lfmu,
             sysmsgs=sysmsgs,
         )
-    # TODO
+    return render_template(
+        "meeting.html",
+        subject=subject,
+        role=role,
+        lfmu=lfmu,
+        other_lfmu=other_lfmu,
+        time_start=None, # TODO
+        time_end=None, # TODO
+        description=description,
+        sysmsgs=sysmsgs,
+    )
 
 
-#     cur.execute("SELECT username FROM mentees WHERE cid = ?", (cid,))
-#     mentees = [x[0] for x in cur.fetchall()]
-#     return render_template(
-#         "meeting.html",
-#         role="mentee",
-#         nametuple=nametuple,
-#         subject=subject,
-#         primary_mentor=get_nametuple(primary_mentor) + tuple([primary_mentor]),
-#         mentees=[(get_nametuple(mentee) + tuple([mentee])) for mentee in mentees],
-#         cid=cid,
-#         timestring=timestring,
-#         description=description,
-#         sysmsgs=sysmsgs,
-#     )
 
+@app.route("/calendar/<username>.ics")
+def calendar(username: str) -> Response:
+    ical = ""
+    # TODO: Actually generate a calendar
+    response = make_response(ical)
+    response.headers["Content-Disposition"] = "attachment; filename=calendar.ics"
+    return response
 
-#
-# @app.route("/calendar/<username>.ics")
-# def calendar(username: str):
-#     ical = ""
-#     # TODO: Actually generate a calendar
-#     response = make_response(ical)
-#     response.headers["Content-Disposition"] = "attachment; filename=calendar.ics"
-#     return response
-#
-#
+@app.route("/expertise")
+def expertise() -> Union[Response, werkzeugResponse]:
+    sysmsgs: List[Union[str, Markup]] = []
+    try:
+        username = check_cookie(request.cookies.get("session-id"))
+    except AuthenticationFault:
+        return redirect("/login")
+    lfmu = get_lfmu(username)
+    return Response()
+
+@app.route("/enlist", methods=["GET", "POST"])
+def enlist() -> Union[Response, werkzeugResponse, str]:
+    sysmsgs: List[Union[str, Markup]] = []
+    try:
+        username = check_cookie(request.cookies.get("session-id"))
+    except AuthenticationFault:
+        return redirect("/login")
+    lfmu = get_lfmu(username)
+    if request.method == "POST":
+        # mode = "confirmed"
+        return Response(repr(request.form["date"]) + ";" + repr(request.form["start"]) + ";" + repr(request.form["end"]) + ";" + repr(request.form["notes"]))
+    return render_template("enlist.html", lfmu=lfmu, mode="fill")
+
 # @app.route("/", methods=["GET", "POST"])
 # def index():
 #     sysmsgs = []
@@ -232,7 +247,7 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
 #         except KeyError:
 #             raise
 #         pass  # TODO process stuff
-#     nametuple = get_nametuple(username)
+#     lfmu = get_lfmu(username)
 #
 #     cur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
 #     for cid in [x[0] for x in cur.fetchall()]:
@@ -241,7 +256,7 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
 #             (cid,),
 #         )
 #     learning_classes = [
-#         (course[0], get_nametuple(course[1]), course[2], course[3]) for course in cur.fetchall()
+#         (course[0], get_lfmu(course[1]), course[2], course[3]) for course in cur.fetchall()
 #     ]
 #
 #     cur.execute("SELECT cid FROM mentees WHERE username = ?", (username,))
@@ -255,36 +270,41 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
 #     # TODO
 #     return render_template(
 #         "student.html",
-#         nametuple=nametuple,
+#         lfmu=lfmu,
 #         learning_meetings=learning_classes,
 #         available_classes=available_classes,
 #         sysmsgs=sysmsgs,
 #     )
 #
 #
-# @app.route("/login", methods=["GET", "POST"])
-# def login():
-#     if request.method == "GET":
-#         username = check_cookie(request.cookies.get("session-id"))
-#         if username:
-#             return render_template(
-#                 "login.html",
-#                 note=f'Note: You are already logged in as "{username}". Use this form to login as another user.',
-#             )
-#         return render_template("login.html")
-#     elif not ("username" in request.form and "password" in request.form):
-#         return render_template(
-#             "login.html",
-#             note='Error: Your request does not include the required fields "username" and "password".',
-#         )
-#     if not check_login("students", request.form["username"], request.form["password"]): # TODO check_login error
-#         return render_template("login.html", note="Error: Invalid credentials.")
-#     username = request.form["username"]
-#     session_id = token_urlsafe(64)
-#     record_cookie("students", username, session_id)
-#     response = make_response(redirect("/"))
-#     response.set_cookie("session-id", session_id)
-#     return response
+
+@app.route("/login", methods=["GET", "POST"])
+def login() -> Union[Response, werkzeugResponse, str]:
+    if request.method == "GET":
+        try:
+            username = check_cookie(request.cookies.get("session-id"))
+        except AuthenticationFault:
+            return render_template("login.html")
+        else:
+            return render_template(
+                "login.html",
+                note=f'Note: You are already logged in as "{username}". Use this form to login as another user.',
+            )
+    elif not ("username" in request.form and "password" in request.form):
+        return render_template(
+            "login.html",
+            note='Error: Your request does not include the required fields "username" and "password".',
+        )
+    try:
+        check_login(request.form["username"], request.form["password"])
+    except AuthenticationFault:
+        return render_template("login.html", note="Error: Invalid credentials.")
+    username = request.form["username"]
+    session_id = token_urlsafe(16)
+    record_cookie(username, session_id)
+    response = make_response(redirect("/"))
+    response.set_cookie("session-id", session_id)
+    return response
 
 
 if __name__ == "__main__":
@@ -292,4 +312,4 @@ if __name__ == "__main__":
         app.run(port=8000, debug=True)
     finally:
         pass
-        # close database
+       # close database

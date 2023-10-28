@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Pao Mentoring</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header>
+	<h1>Pao Mentoring: {{lfmu[0]}}, {{lfmu[1]}} {{lfmu[2]}}</h1>
+</header>
+
+{% if sysmsgs %}
+<div id="sysmsgs">
+{% for sysmsg in sysmsgs %}
+{{ sysmsg }}<br />
+{% endfor %}
+</div>
+{% endif %}
+
+{% if mode == "fill" %}
+
+<p>
+You are about to enlist a block of your free time where you are capable of conducting a mentoring meeting.
+</p>
+
+<p>
+You are currently registered for expertise in {{ subjects }}. <a href="/expertise"><button>Change</button></a>
+</p>
+
+<form action="/enlist" method="post">
+	<label for="date">Date</label>
+	<input type="date" name="date">
+	<br />
+	<label for="start">Start</label>
+	<input type="time" name="start">
+	<br />
+	<label for="end">End</label>
+	<input type="time" name="end">
+	<br />
+	<label for="notes">Notes</label>
+	<textarea name="notes" rows="4" wrap="soft"></textarea>
+	<br />
+	<input type="submit" value="Enlist" />
+</form> 
+
+{% elif mode == "confirmed" %}
+
+{% else %}
+
+what
+
+{% endif %}
+
+</body>
+</html>
