@@ -46,7 +46,7 @@ import sqlite3
 from jinja2 import StrictUndefined
 
 app = Flask(__name__)
-app.jinja_env.undefined = StrictUndefined
+# app.jinja_env.undefined = StrictUndefined
 
 con = sqlite3.connect("yay.db", check_same_thread=False)
 null_lfmu = ("None", "None", "(None)", "none")
