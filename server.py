@@ -43,8 +43,10 @@ from secrets import token_urlsafe
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import sqlite3
+from jinja2 import StrictUndefined
 
 app = Flask(__name__)
+app.jinja_env.undefined = StrictUndefined
 
 con = sqlite3.connect("yay.db", check_same_thread=False)
 null_lfmu = ("None", "None", "(None)", "none")
@@ -130,21 +132,6 @@ def get_lfmu(username: str) -> Tuple[str, str, str, str]:
     return (res[0][0], res[0][1], res[0][2], username)
 
 
-"""
-    if request.method == "POST":
-        try:
-            if request.form["action"] == "register":
-                # TODO: Check if the course exists first, to avoid cluttering the database
-                cur.execute("INSERT INTO mentees VALUES (?, ?)", (username, cid))
-                snotes.append("You have successfully registered in this section.")
-            else:
-                return "stop haxing the requests thanks"
-        except KeyError:
-            raise
-        pass
-"""
-
-
 @app.route("/meeting/<mid>", methods=["GET", "POST"])
 def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     snotes: List[Union[str, Markup]] = []
@@ -216,7 +203,9 @@ def expertise() -> Union[Response, werkzeugResponse, str]:
         "expertise.html",
         lfmu=lfmu,
         snotes=snotes,
-        subjects=con.execute("SELECT subjects FROM users WHERE username = ?", (username,)).fetchall()[0][0],
+        subjects=con.execute(
+            "SELECT subjects FROM users WHERE username = ?", (username,)
+        ).fetchall()[0][0],
     )
 
 
@@ -388,11 +377,15 @@ def index() -> Union[str, Response, werkzeugResponse]:
                             % request.form["mid"]
                         )
             elif request.form["action"] == "expertise":
-                assert con.execute("UPDATE users SET subjects = ? WHERE username = ?", (request.form["expertise"], username)).rowcount == 1
-                con.commit()
-                snotes.append(
-                    "You just updated your subject expertise"
+                assert (
+                    con.execute(
+                        "UPDATE users SET subjects = ? WHERE username = ?",
+                        (request.form["expertise"], username),
+                    ).rowcount
+                    == 1
                 )
+                con.commit()
+                snotes.append("You just updated your subject expertise")
             elif request.form["action"] == "register_meeting":
                 res = con.execute(
                     "SELECT mentor, mentee FROM meetings WHERE mid = ?",
@@ -453,7 +446,9 @@ def index() -> Union[str, Response, werkzeugResponse]:
         lfmu=lfmu,
         meetings_as_mentee=meetings_as_mentee,
         meetings_as_mentor=meetings_as_mentor,
-        subjects=con.execute("SELECT subjects FROM users WHERE username = ?", (username,)).fetchall()[0][0],
+        subjects=con.execute(
+            "SELECT subjects FROM users WHERE username = ?", (username,)
+        ).fetchall()[0][0],
         snotes=snotes,
     )
 
@@ -486,10 +481,10 @@ def login() -> Union[Response, werkzeugResponse, str]:
     response.set_cookie("session-id", session_id)
     return response
 
-
 if __name__ == "__main__":
     try:
         app.run(port=48139, debug=True)
     finally:
+        con.commit()
+        con.close()
         pass
-    # close database

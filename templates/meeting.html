@@ -51,9 +51,9 @@ Mentor: <a href="mailto:{{ other_lfmu[3] }}@ykpaoschool.cn">{{ other_lfmu[0] }},
 {% endif %}
 
 
-{% if role == "mentee" or role == "mentor" %}
+{% if role == "mentee" or role == "mentor" or role == "squishist" %}
 <p>
-Description: {% if notes %} {{ notes }} {% else %} None {% endif %}
+Notes: {% if notes %} {{ notes }} {% else %} None {% endif %}
 </p>
 <p>
 Start: {{ time_start }}
