@@ -389,7 +389,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
             elif request.form["action"] == "register_meeting":
                 res = con.execute(
                     "SELECT mentor, mentee FROM meetings WHERE mid = ?",
-                    (request.form["mid"]),
+                    (request.form["mid"],),
                 ).fetchall()
                 if len(res) != 1 or res[0][1]:
                     snotes.append(
