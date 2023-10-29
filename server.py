@@ -157,7 +157,7 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     try:
         intmid = int(mid)
     except ValueError:
-        raise # TODO
+        raise  # TODO
     res = con.execute(
         "SELECT mentor, mentee, time_start, time_end, notes FROM meetings WHERE mid = ?",
         (intmid,),
@@ -174,7 +174,7 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
         other_lfmu = get_lfmu(mentor)
     elif not mentee:
         other_lfmu = None
-        role = "squishist" 
+        role = "squishist"
     else:  # user is not related to the meeting
         return render_template(
             "meeting.html",
@@ -212,7 +212,12 @@ def expertise() -> Union[Response, werkzeugResponse, str]:
     except AuthenticationFault:
         return redirect("/login")
     lfmu = get_lfmu(username)
-    return Response()
+    return render_template(
+        "expertise.html",
+        lfmu=lfmu,
+        snotes=snotes,
+        subjects=con.execute("SELECT subjects FROM users WHERE username = ?", (username,)).fetchall()[0][0],
+    )
 
 
 @app.route("/enlist", methods=["GET", "POST"])
@@ -264,7 +269,13 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
             tstart = int(start.timestamp())
             tend = int(end.timestamp())
             notes = request.form["notes"]
-            assert con.execute("INSERT INTO meetings (mentor, time_start, time_end, notes) VALUES (?, ?, ?, ?)", (username, tstart, tend, notes)).rowcount == 1
+            assert (
+                con.execute(
+                    "INSERT INTO meetings (mentor, time_start, time_end, notes) VALUES (?, ?, ?, ?)",
+                    (username, tstart, tend, notes),
+                ).rowcount
+                == 1
+            )
             con.commit()
             return render_template(
                 "enlist.html",
@@ -273,7 +284,7 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 mode="confirmed",
                 starts=start.strftime("%c"),
                 ends=end.strftime("%c"),
-                notes=notes
+                notes=notes,
             )
         else:
             snotes.append(
@@ -284,6 +295,7 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
         return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
     else:
         raise GeneralFault()
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register() -> Union[str, Response, werkzeugResponse]:
@@ -296,15 +308,30 @@ def register() -> Union[str, Response, werkzeugResponse]:
         return "this is not british politics"
     lfmu = get_lfmu(username)
 
-    available_meetings = [(i[0], get_lfmu(i[1]), "get off my lawn", datetime.fromtimestamp(i[2]).strftime("%c"), datetime.fromtimestamp(i[3]).strftime("%c")) for i in con.execute("SELECT mid, mentor, time_start, time_end FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''", (username,)).fetchall()]
+    available_meetings = [
+        (
+            i[0],
+            get_lfmu(i[1]),
+            con.execute(
+                "SELECT subjects FROM users WHERE username = ?", (username,)
+            ).fetchall()[0][0],
+            datetime.fromtimestamp(i[2]).strftime("%c"),
+            datetime.fromtimestamp(i[3]).strftime("%c"),
+        )
+        for i in con.execute(
+            "SELECT mid, mentor, time_start, time_end FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''",
+            (username,),
+        ).fetchall()
+    ]
 
     # TODO
     return render_template(
         "register.html",
         lfmu=lfmu,
-        available_meetings = available_meetings,
+        available_meetings=available_meetings,
         snotes=snotes,
     )
+
 
 @app.route("/", methods=["GET", "POST"])
 def index() -> Union[str, Response, werkzeugResponse]:
@@ -316,35 +343,80 @@ def index() -> Union[str, Response, werkzeugResponse]:
     if request.method == "POST":
         try:
             if request.form["action"] == "deregister_meeting":
-                res = con.execute("SELECT mentor, mentee FROM meetings WHERE mid = ?", (request.form["mid"])).fetchall()
+                res = con.execute(
+                    "SELECT mentor, mentee FROM meetings WHERE mid = ?",
+                    (request.form["mid"]),
+                ).fetchall()
                 if len(res) != 1:
-                    snotes.append("You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions" % request.form["mid"])
+                    snotes.append(
+                        "You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions"
+                        % request.form["mid"]
+                    )
                 else:
                     mentor, mentee = res[0]
                     if username == mentor:
-                        assert con.execute("DELETE FROM meetings WHERE mid = ?", (request.form["mid"],),).rowcount == 1
+                        assert (
+                            con.execute(
+                                "DELETE FROM meetings WHERE mid = ?",
+                                (request.form["mid"],),
+                            ).rowcount
+                            == 1
+                        )
                         con.commit()
                         snotes.append(
-                            "You have deregistered from, and deleted, meeting %s" % request.form["mid"]
+                            "You have deregistered from, and deleted, meeting %s"
+                            % request.form["mid"]
                         )
                         # somehow notify mentee with request.form["reason"]
                     elif username == mentee:
-                        assert con.execute("UPDATE meetings SET mentee = NULL WHERE mid = ?", (request.form["mid"],),).rowcount == 1
+                        assert (
+                            con.execute(
+                                "UPDATE meetings SET mentee = NULL WHERE mid = ?",
+                                (request.form["mid"],),
+                            ).rowcount
+                            == 1
+                        )
                         con.commit()
                         snotes.append(
-                            "You have deregistered from meeting %s" % request.form["mid"]
+                            "You have deregistered from meeting %s"
+                            % request.form["mid"]
                         )
                         # somehow notify mentor with request.form["reason"]
                     else:
-                        snotes.append("You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions" % request.form["mid"])
+                        snotes.append(
+                            "You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions"
+                            % request.form["mid"]
+                        )
+            elif request.form["action"] == "expertise":
+                assert con.execute("UPDATE users SET subjects = ? WHERE username = ?", (request.form["expertise"], username)).rowcount == 1
+                con.commit()
+                snotes.append(
+                    "You just updated your subject expertise"
+                )
             elif request.form["action"] == "register_meeting":
-                res = con.execute("SELECT mentor, mentee FROM meetings WHERE mid = ?", (request.form["mid"])).fetchall()
+                res = con.execute(
+                    "SELECT mentor, mentee FROM meetings WHERE mid = ?",
+                    (request.form["mid"]),
+                ).fetchall()
                 if len(res) != 1 or res[0][1]:
-                    snotes.append("The meeting you were trying to register disappeared, perhaps someone registered it just now, or the mentor deleted it?")
+                    snotes.append(
+                        "The meeting you were trying to register disappeared, perhaps someone registered it just now, or the mentor deleted it?"
+                    )
                 elif username == res[0][0]:
-                    snotes.append("??? why are you trying to register your own session, this is not discovery in civil litigations you can stop fighting yourself <3")
+                    snotes.append(
+                        "??? why are you trying to register your own session, this is not discovery in civil litigations you can stop fighting yourself <3"
+                    )
                 else:
-                    assert con.execute("UPDATE meetings SET mentee = ? WHERE mid = ?", (username, request.form["mid"],),).rowcount == 1
+                    assert (
+                        con.execute(
+                            "UPDATE meetings SET mentee = ? WHERE mid = ?",
+                            (
+                                username,
+                                request.form["mid"],
+                            ),
+                        ).rowcount
+                        == 1
+                    )
                     con.commit()
                     snotes.append(
                         "You have registered for meeting %s" % request.form["mid"]
@@ -357,10 +429,23 @@ def index() -> Union[str, Response, werkzeugResponse]:
         pass  # TODO process stuff
     lfmu = get_lfmu(username)
 
-    meetings_as_mentee = [(i[0], get_lfmu(i[1]), datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentor, time_start FROM meetings WHERE mentee = ?", (username,)).fetchall()]
+    meetings_as_mentee = [
+        (i[0], get_lfmu(i[1]), datetime.fromtimestamp(i[2]).strftime("%c"))
+        for i in con.execute(
+            "SELECT mid, mentor, time_start FROM meetings WHERE mentee = ?", (username,)
+        ).fetchall()
+    ]
 
-    meetings_as_mentor = [(i[0], get_lfmu(i[1]) if i[1] else null_lfmu, datetime.fromtimestamp(i[2]).strftime("%c")) for i in con.execute("SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?", (username,)).fetchall()]
-
+    meetings_as_mentor = [
+        (
+            i[0],
+            get_lfmu(i[1]) if i[1] else null_lfmu,
+            datetime.fromtimestamp(i[2]).strftime("%c"),
+        )
+        for i in con.execute(
+            "SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?", (username,)
+        ).fetchall()
+    ]
 
     # TODO
     return render_template(
@@ -368,10 +453,9 @@ def index() -> Union[str, Response, werkzeugResponse]:
         lfmu=lfmu,
         meetings_as_mentee=meetings_as_mentee,
         meetings_as_mentor=meetings_as_mentor,
+        subjects=con.execute("SELECT subjects FROM users WHERE username = ?", (username,)).fetchall()[0][0],
         snotes=snotes,
     )
-
-
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -401,6 +485,7 @@ def login() -> Union[Response, werkzeugResponse, str]:
     response = make_response(redirect("/"))
     response.set_cookie("session-id", session_id)
     return response
+
 
 if __name__ == "__main__":
     try:

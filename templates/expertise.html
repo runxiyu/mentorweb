@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Pao Mentoring</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header>
+	<h1>Pao Mentoring: {{lfmu[0]}}, {{lfmu[1]}} ({{lfmu[2]}})</h1>
+</header>
+
+{% if snotes %}
+<div id="snotes">
+{% for snote in snotes %}
+{{ snote }}<br />
+{% endfor %}
+</div>
+{% endif %}
+
+{% if subjects %}
+<p>
+You are currently registered for expertise in: {{ subjects }}.
+</p>
+{% else %}
+<p>
+You are not currently registered for expertise in any subjects.
+</p>
+{% endif %}
+
+<form action="/" method="post">
+	<input type="hidden" name="action" value="expertise" />
+	<label for="expertise">Update</label>
+	<input type="text" name="expertise"/>
+	<br />
+	<input type="submit" value="Submit" />
+</form> 
+
+</body>
+</html>
