@@ -18,14 +18,12 @@
 	{% endfor %}
 	</div>
 	{% endif %}
-	<div>
-		<a href="/enlist">Enlist as a mentor</a>
-		or
-		<a href="/register">Register as a mentee</a>?
-	</div>
 	<h2>
 		Meetings as mentee:
 	</h2>
+	<p>
+		<a href="/register">Register for a meeting...</a>
+	</p>
 	{% if meetings_as_mentee %}
 			<table>
 			<tr>
@@ -52,7 +50,10 @@
 		Meetings as mentor:
 	</h2>
 	<p>
-	You teach the subjects: {% if subjects %} {{subjects}} {% else %} Nothing {%endif%}, <a href="/expertise">modify</a>
+	You teach the subjects: {% if subjects %}{{subjects}}{% else %}Nothing{%endif%}, <a href="/expertise">modify</a>
+	</p>
+	<p>
+		<a href="/enlist">Enlist your time...</a>
 	</p>
 	{% if meetings_as_mentor %}
 			<table>

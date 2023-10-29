@@ -46,7 +46,7 @@ import sqlite3
 from jinja2 import StrictUndefined
 
 app = Flask(__name__)
-# app.jinja_env.undefined = StrictUndefined
+app.jinja_env.undefined = StrictUndefined
 
 con = sqlite3.connect("yay.db", check_same_thread=False)
 null_lfmu = ("None", "None", "(None)", "none")
@@ -217,6 +217,7 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
     except AuthenticationFault:
         return redirect("/login")
     lfmu = get_lfmu(username)
+    subjects = con.execute( "SELECT subjects FROM users WHERE username = ?", (username,)).fetchall()[0][0]
     if request.method == "POST":
         # clean this part up a bit when you get to do so. pass unix timestamps around, not weird strings.
         try:
@@ -231,17 +232,17 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
             snotes.append(
                 "Your previous submission was rejected because the date or time formats were unreadable."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
         except KeyError:
             snotes.append(
                 "Your previous submission was rejected because the request did not contain the necessary fields."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
         if end.timestamp() <= start.timestamp():
             snotes.append(
                 "Your previous submission was rejected because the end time is earlier than the start time. Butter fingers! I still don't want to use JavaScript, sue me."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
         if request.form["mode"] == "confirm":
             return render_template(
                 "enlist.html",
@@ -253,6 +254,7 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 starts=start.strftime("%c"),
                 ends=end.strftime("%c"),
                 notes=request.form["notes"],
+                subjects=subjects,
             )
         elif request.form["mode"] == "confirmed":
             tstart = int(start.timestamp())
@@ -274,14 +276,15 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 starts=start.strftime("%c"),
                 ends=end.strftime("%c"),
                 notes=notes,
+                subjects=subjects,
             )
         else:
             snotes.append(
                 "Why was this even in a POST request? I'm letting you go this time..."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects,)
     elif request.method == "GET":
-        return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill")
+        return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects,)
     else:
         raise GeneralFault()
 
@@ -334,7 +337,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
             if request.form["action"] == "deregister_meeting":
                 res = con.execute(
                     "SELECT mentor, mentee FROM meetings WHERE mid = ?",
-                    (request.form["mid"]),
+                    (request.form["mid"],),
                 ).fetchall()
                 if len(res) != 1:
                     snotes.append(
