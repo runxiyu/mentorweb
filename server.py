@@ -404,7 +404,7 @@ def login() -> Union[Response, werkzeugResponse, str]:
 
 if __name__ == "__main__":
     try:
-        app.run(port=8000, debug=True)
+        app.run(port=48139, debug=True)
     finally:
         pass
     # close database
