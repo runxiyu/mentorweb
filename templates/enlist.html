@@ -24,9 +24,15 @@
 You are about to enlist a block of your free time where you are capable of conducting a mentoring meeting.
 </p>
 
+{% if subjects %}
 <p>
-You are currently registered for expertise in {{ subjects }}. <a href="/expertise"><button>Change</button></a>
+You are currently registered for expertise in {{ subjects }}. <a href="/expertise">Change</a>
 </p>
+{% else %}
+<p>
+You are not currently registered for expertise in any subjects. Please <a href="/expertise">fix this</a>
+</p>
+{% endif %}
 
 <form action="/enlist" method="post">
 	<input type="hidden" name="mode" value="confirm" />
@@ -72,10 +78,21 @@ Notes:
 	<input type="submit" value="Enlist" />
 </form> 
 
+<input action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" /> (this button requires JavaScript)
+
+
 {% elif mode == "confirmed" %}
 
 <p>
 You have confirmed that you have time to perform mentoring activities during the following period. I will add this block onto your calendar to remind you to keep it free, and I'll email you if someone registers.
+</p>
+
+<p>
+<a href="/enlist">Enlist another time block</a>
+</p>
+
+<p>
+<a href="/">Return home</a>
 </p>
 
 <p>

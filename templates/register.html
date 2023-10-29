@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Pao Mentoring</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header>
+	<header>
+		<h1>
+			Pao Mentoring: {{lfmu[0]}}, {{lfmu[1]}} ({{lfmu[2]}})
+		</h1>
+	</header>
+	{% if snotes %}
+	<div id="snotes">
+	{% for snote in snotes %}
+	{{ snote }}<br />
+	{% endfor %}
+	</div>
+	{% endif %}
+
+	<h2>
+		Available meetings to register in:
+	</h2>
+	{% if available_meetings %}
+			<table>
+			<tr>
+				<th>Mentor</th>
+				<th>Subjects</th>
+				<th>Start</th>
+				<th>End</th>
+				<th>Actions</th>
+			</tr>
+			{% for i in available_meetings %}
+				<tr>
+					<td>{{ i[1][0] }}, {{ i[1][1] }} ({{ i[1][2] }})</td>
+					<td>{{ i[2] }}</td>
+					<td>{{ i[3] }}</td>
+					<td>{{ i[4] }}</td>
+					<td>
+						<a href="/meeting/{{ i[0] }}">
+						View
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+			</table>
+	{% else %}
+		There are no available meetings. 你们都太卷了，或者是，mentor 太少了……悲
+	{% endif %}
+
+</body>
+</html>

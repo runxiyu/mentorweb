@@ -282,10 +282,30 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
     else:
         raise GeneralFault()
 
+@app.route("/register", methods=["GET", "POST"])
+def register() -> Union[str, Response, werkzeugResponse]:
+    snotes: List[Union[str, Markup]] = []
+    try:
+        username = check_cookie(request.cookies.get("session-id"))
+    except AuthenticationFault:
+        return redirect("/login")
+    if request.method == "POST":
+        return "this is not british politics"
+    lfmu = get_lfmu(username)
+
+    available_meetings = [(i[0], get_lfmu(i[1]), "get off my lawn", datetime.fromtimestamp(i[2]).strftime("%c"), datetime.fromtimestamp(i[3]).strftime("%c")) for i in con.execute("SELECT mid, mentor, time_start, time_end FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''", (username,)).fetchall()]
+
+    # TODO
+    return render_template(
+        "register.html",
+        lfmu=lfmu,
+        available_meetings = available_meetings,
+        snotes=snotes,
+    )
 
 @app.route("/", methods=["GET", "POST"])
 def index() -> Union[str, Response, werkzeugResponse]:
-    snotes = []
+    snotes: List[Union[str, Markup]] = []
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -306,7 +326,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
                         )
                         # somehow notify mentee with request.form["reason"]
                     elif username == mentee:
-                        assert con.execute("UPDATE meetings SET mentee = \"\" WHERE mid = ?", (request.form["mid"],),).rowcount == 1
+                        assert con.execute("UPDATE meetings SET mentee = NULL WHERE mid = ?", (request.form["mid"],),).rowcount == 1
                         con.commit()
                         snotes.append(
                             "You have deregistered from meeting %s" % request.form["mid"]
@@ -315,7 +335,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
                     else:
                         snotes.append("You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions" % request.form["mid"])
             else:
-                return "stop haxing the requests thanks"
+                return "this is not american politics"
         except KeyError:
             raise
         pass  # TODO process stuff
