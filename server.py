@@ -313,7 +313,7 @@ def register() -> Union[str, Response, werkzeugResponse]:
             i[0],
             get_lfmu(i[1]),
             con.execute(
-                "SELECT subjects FROM users WHERE username = ?", (username,)
+                "SELECT subjects FROM users WHERE username = ?", (i[1],)
             ).fetchall()[0][0],
             datetime.fromtimestamp(i[2]).strftime("%c"),
             datetime.fromtimestamp(i[3]).strftime("%c"),
