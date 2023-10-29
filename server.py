@@ -402,7 +402,6 @@ def login() -> Union[Response, werkzeugResponse, str]:
     response.set_cookie("session-id", session_id)
     return response
 
-
 if __name__ == "__main__":
     try:
         app.run(port=8000, debug=True)
