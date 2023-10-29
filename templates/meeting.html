@@ -48,10 +48,6 @@ You have scheduled this meeting as a mentee.
 Mentor: <a href="mailto:{{ other_lfmu[3] }}@ykpaoschool.cn">{{ other_lfmu[0] }}, {{ other_lfmu[1] }} {{ other_lfmu[2] }}</a>
 </p>
 
-{% else %}
-<div id="syserr">
-	Programming error: "role" was given an unexpected value, "{{ role }}".
-</div>
 {% endif %}
 
 
@@ -65,6 +61,9 @@ Start: {{ time_start }}
 <p>
 End: {{ time_end }}
 </p>
+{% endif %}
+
+{% if role == "mentee" or role == "mentor" %}
 <div id="deregister-meeting">
 <h2>Deregister</h2>
 <form action="/" method="post">
@@ -75,7 +74,17 @@ End: {{ time_end }}
 	<input type="submit" value="Deregister Meeting" />
 </form> 
 </div>
-
+{% elif role == "squishist" %}
+<div id="register-meeting">
+<h2>Register</h2>
+<form action="/" method="post">
+	<input type="hidden" name="action" value="register_meeting" />
+	<input type="hidden" name="mid" value="{{ mid }}" />
+	<label for="Comment">Comment</label><br />
+	<textarea name="comment" rows="4" wrap="soft"></textarea><br />
+	<input type="submit" value="Register Meeting" />
+</form> 
+</div>
 {% endif %}
 
 

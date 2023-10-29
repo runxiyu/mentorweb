@@ -172,6 +172,9 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     elif username == mentee:
         role = "mentee"
         other_lfmu = get_lfmu(mentor)
+    elif not mentee:
+        other_lfmu = None
+        role = "squishist" 
     else:  # user is not related to the meeting
         return render_template(
             "meeting.html",
@@ -334,10 +337,23 @@ def index() -> Union[str, Response, werkzeugResponse]:
                         # somehow notify mentor with request.form["reason"]
                     else:
                         snotes.append("You tried to deregister from meeting %s but it doesn't even exist or you don't have permissions" % request.form["mid"])
+            elif request.form["action"] == "register_meeting":
+                res = con.execute("SELECT mentor, mentee FROM meetings WHERE mid = ?", (request.form["mid"])).fetchall()
+                if len(res) != 1 or res[0][1]:
+                    snotes.append("The meeting you were trying to register disappeared, perhaps someone registered it just now, or the mentor deleted it?")
+                elif username == res[0][0]:
+                    snotes.append("??? why are you trying to register your own session, this is not discovery in civil litigations you can stop fighting yourself <3")
+                else:
+                    assert con.execute("UPDATE meetings SET mentee = ? WHERE mid = ?", (username, request.form["mid"],),).rowcount == 1
+                    con.commit()
+                    snotes.append(
+                        "You have registered for meeting %s" % request.form["mid"]
+                    )
+                    # somehow notify mentor
             else:
                 return "this is not american politics"
         except KeyError:
-            raise
+            return "rishi sunak???"
         pass  # TODO process stuff
     lfmu = get_lfmu(username)
 
