@@ -8,7 +8,7 @@
 <header>
 	<header>
 		<h1>
-			Pao Mentoring: {{lfmu[0]}}, {{lfmu[1]}} ({{lfmu[2]}})
+			Pao Mentoring: {{lfmu[0]}}, {{lfmu[1]}} {{lfmu[2]}}
 		</h1>
 	</header>
 	{% if snotes %}
@@ -35,7 +35,7 @@
 			</tr>
 			{% for i in meetings_as_mentee %}
 				<tr>
-					<td>{{ i[1][0] }}, {{ i[1][1] }} ({{ i[1][2] }})</td>
+					<td>{{ i[1][0] }}, {{ i[1][1] }} {{ i[1][2] }}</td>
 					<td>{{ i[2] }}</td>
 					<td>
 						<a href="/meeting/{{ i[0] }}">
