@@ -459,7 +459,7 @@ def login() -> Union[Response, werkzeugResponse, str]:
         try:
             username = check_cookie(request.cookies.get("session-id"))
         except AuthenticationFault:
-            return render_template("login.html")
+            return render_template("login.html", note="")
         else:
             return render_template(
                 "login.html",
