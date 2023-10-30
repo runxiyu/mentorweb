@@ -34,35 +34,36 @@ h2, h3, h4, h5, h6 {
 }
 
 header {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0;
-    color: white;
-    background-color: rgb(20, 120, 20);
-    padding: 0.4em;
-    z-index: 1000;
-    width: 100%;
+	position: -webkit-sticky;
+	position: sticky;
+	top: 0;
+	left: 0;
+	color: white;
+	background-color: rgb(20, 120, 20);
+	padding: 0.4em;
+	z-index: 1000;
+	width: 100%;
 }
 
 .header-content {
 	max-width: 50rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 auto;
 }
 
 header img {
 	vertical-align: middle;
-    max-height: 40px;
+	max-height: 40px;
 }
 header a {
 	color: white;
 }
 
 header h1 {
-	margin: 0.4em;
-    font-size: 25px;
+	margin-right: 0.4em;
+	font-size: 25px;
 }
 
 header p {
