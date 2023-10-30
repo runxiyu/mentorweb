@@ -42,8 +42,9 @@ from time import time
 from secrets import token_urlsafe
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-import sqlite3
 from jinja2 import StrictUndefined
+import sqlite3
+import ics
 
 app = Flask(__name__)
 app.jinja_env.undefined = StrictUndefined
@@ -182,12 +183,12 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     )
 
 
-@app.route("/calendar/<username>.ics")
+@app.route("/<username>.ics") # I don't think calendars need to be authenticated for now, but if they want then sure
 def calendar(username: str) -> Response:
     ical = ""
     # TODO: Actually generate a calendar
     response = make_response(ical)
-    response.headers["Content-Disposition"] = "attachment; filename=calendar.ics"
+    response.headers["Content-Disposition"] = "attachment; filename=%s.ics" % username # TODO: Possible injection?
     return response
 
 
