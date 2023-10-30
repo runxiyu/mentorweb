@@ -35,6 +35,9 @@ h2, h3, h4, h5, h6 {
 header {
 	position: -webkit-sticky;
 	position: sticky;
+	top: 0;
+	left: 0;
+	margin: -5;
 	color: white;
 	background-color: rgb(20, 120, 20);
 	z-index: 1000;
