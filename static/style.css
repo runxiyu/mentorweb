@@ -1,6 +1,6 @@
 html {
 	font-family: "SF Pro", "Inter", "Arial", "Noto Sans SC", sans-serif;
-	max-width: 50rem;
+	max-width: 60rem;
 	margin: 0 auto;
 	line-height: 1.2;
 	border-color: black;
@@ -27,10 +27,6 @@ a.link {color: rgb(20, 120, 20);}
 a.visited {color: rgb(70, 70, 20);}
 a.active {color: rgb(20, 120, 20);}
 */
-
-h1, h2, h3, h4, h5, h6 {
-	font-family: "New York", "Georgia", "Noto Serif SC", serif;
-}
 
 h2, h3, h4, h5, h6 {
 	margin-top: 2rem;
