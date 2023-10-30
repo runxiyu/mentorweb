@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Login</title>
+<title>PowerSchool Authentication &mdash; Pao Mentoring</title>
 <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -10,13 +10,13 @@
 		<h1><a href="/"><img src="/static/peer-pao-white.png" title="Peer Pao"> Peer Pao</a></h1>
 	</div>
 	<div class="header-right">
-		<p>Login</p>
+		<p>PowerSchool Authentication</p>
 	</div>
 </header>
 <p>
-This login page is for existing users who would like to login with their existing password. New users, or users who would like to update their password to match their current PowerSchool password, must use the <a href="/psauth">PowerSchool Authentication</a> page.
+This page is for people who need to change their password to match their current PowerSchool password, or for new users to register. Existing users who want to use their existing password should use the <a href="/login">login</a> page instead.
 </p>
-<form action="/login" method="POST">
+<form action="/psauth" method="POST">
 	<ul>
 		<li>
 			<label for="username">Username</label>

@@ -44,7 +44,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from jinja2 import StrictUndefined
 import sqlite3
+import requests
 import ics
+import re
 
 app = Flask(__name__)
 app.jinja_env.undefined = StrictUndefined
@@ -457,6 +459,30 @@ def index() -> Union[str, Response, werkzeugResponse]:
     )
 
 
+def check_powerschool(username: str, password: str) -> tuple[str, str, str]:
+    ss = requests.Session()
+    
+    rq = ss.post(
+        "https://powerschool.ykpaoschool.cn/guardian/home.html",
+        data={
+            "request_locale": "en_US",
+            "account": username,
+            "pw": password,
+            "ldappassword": password,
+        },
+    )
+
+    html = ss.get("https://powerschool.ykpaoschool.cn/guardian/home.html").text
+
+    match = re.search(r"<h1>Grades and Attendance: ([A-Za-z]+), ([A-Za-z]+) (.*)</h1>", html)
+
+    if not match:
+        raise AuthenticationFault
+
+    return match.group(1), match.group(2), match.group(3)
+
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login() -> Union[Response, werkzeugResponse, str]:
     if request.method == "GET":
@@ -474,12 +500,52 @@ def login() -> Union[Response, werkzeugResponse, str]:
             "login.html",
             note='Error: Your request does not include the required fields "username" and "password".',
         )
+    else:
+        raise GeneralFault
     try:
         check_login(request.form["username"], request.form["password"])
     except AuthenticationFault:
         return render_template("login.html", note="Error: Invalid credentials.")
     username = request.form["username"]
     session_id = token_urlsafe(16)
+    record_cookie(username, session_id)
+    response = make_response(redirect("/"))
+    response.set_cookie("session-id", session_id)
+    return response
+
+@app.route("/psauth", methods=["GET", "POST"])
+def psauth() -> Union[Response, werkzeugResponse, str]:
+    if request.method == "GET":
+        try:
+            username = check_cookie(request.cookies.get("session-id"))
+        except AuthenticationFault:
+            return render_template("psauth.html", note="")
+        else:
+            return render_template(
+                "psauth.html",
+                note=f'Note: You are already logged in as "{username}". Use this form to use PowerSchool authentication details to register as another user.',
+            )
+    elif not ("username" in request.form and "password" in request.form):
+        return render_template(
+            "login.html",
+            note='Error: Your request does not include the required fields "username" and "password".',
+        )
+    try:
+        lastname, firstname, middlename = check_powerschool(request.form["username"], request.form["password"])
+    except AuthenticationFault:
+        return render_template("psauth.html", note="Error: Invalid PowerSchool credentials (or maybe you just have an unusual name that my regular expression fails to parse).")
+    username = request.form["username"]
+    password = request.form["password"]
+    session_id = token_urlsafe(16)
+    lf = len(con.execute("SELECT username FROM users WHERE username = ?", (username,)).fetchall())
+    if lf > 1:
+        raise DatabaseFault(username)
+    elif lf == 1:
+        assert con.execute("UPDATE users SET argon2 = ?, lastname = ?, firstname = ?, middlename = ? WHERE username = ?", (PasswordHasher().hash(password), lastname, firstname, middlename, username)).rowcount == 1
+        con.commit()
+    elif lf == 0:
+        assert con.execute("INSERT INTO users (username, argon2, lastname, firstname, middlename) VALUES (?, ?, ?, ?, ?)", (username, PasswordHasher().hash(password), lastname, firstname, middlename)).rowcount == 1
+        con.commit()
     record_cookie(username, session_id)
     response = make_response(redirect("/"))
     response.set_cookie("session-id", session_id)
