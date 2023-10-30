@@ -500,8 +500,6 @@ def login() -> Union[Response, werkzeugResponse, str]:
             "login.html",
             note='Error: Your request does not include the required fields "username" and "password".',
         )
-    else:
-        raise GeneralFault
     try:
         check_login(request.form["username"], request.form["password"])
     except AuthenticationFault:
