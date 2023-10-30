@@ -1,9 +1,16 @@
 html {
 	font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Inter", "Noto Sans SC", sans-serif;
 	line-height: 1.2;
+	margin: 0;
+	padding: 0;
 	border-color: black;
 	color: black;
 	background-color: white;
+}
+
+body {
+	margin: 0;
+	padding: 0;
 }
 
 .content {
@@ -37,7 +44,6 @@ header {
 	position: sticky;
 	top: 0;
 	left: 0;
-	margin: -5;
 	color: white;
 	background-color: rgb(20, 120, 20);
 	z-index: 1000;
