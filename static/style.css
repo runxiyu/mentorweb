@@ -1,5 +1,5 @@
 html {
-	font-family: "SF Pro", "Inter", "Arial", "Noto Sans SC", sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Inter", "Noto Sans SC", sans-serif;
 	max-width: 60rem;
 	margin: 0 auto;
 	line-height: 1.2;
