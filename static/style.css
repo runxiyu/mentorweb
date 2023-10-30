@@ -50,8 +50,8 @@ header {
 }
 
 .header-content {
-	padding-left: 0.5em;
-	padding-right: 0.5em;
+	padding-left: 1em;
+	padding-right: 1em;
 	max-width: 50rem;
 	display: flex;
 	justify-content: space-between;
