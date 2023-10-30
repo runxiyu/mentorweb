@@ -162,7 +162,8 @@ form label {
 
 form input:not([type="submit"]), textarea {
 	font: 1em sans-serif;
-	width: 60%;
+	width: auto;
+	max-width: 80%;
 	box-sizing: border-box;
 	border: 1px solid #999;
 }
