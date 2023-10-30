@@ -185,12 +185,33 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     )
 
 
-@app.route("/<username>.ics") # I don't think calendars need to be authenticated for now, but if they want then sure
+@app.route("/<username>.ics")
 def calendar(username: str) -> Response:
-    ical = ""
-    # TODO: Actually generate a calendar
-    response = make_response(ical)
-    response.headers["Content-Disposition"] = "attachment; filename=%s.ics" % username # TODO: Possible injection?
+    cal = ics.Calendar()
+    
+    res = con.execute("SELECT mid, mentor, mentee, time_start, time_end, notes FROM meetings WHERE mentor = ? or mentee = ?", (username, username)).fetchall()
+
+    for (mid, mentor, mentee, time_start, time_end, notes) in res:
+        ev = ics.Event()
+        if mentor == username:
+            penguin = get_lfmu(mentee)
+            mode = "Mentoring: {}, {} {} as mentor"
+        elif mentee == username:
+            penguin = get_lfmu(mentor)
+            mode = "Mentoring: {}, {} {} as mentee"
+        ev.name = mode.format(penguin[0], penguin[1], penguin[2])
+        ev.organizer = ics.Organizer("%s@ykpaoschool.cn" % penguin[3])
+        ev.begin = datetime.fromtimestamp(time_start - 28800).strftime("%Y-%m-%d %H:%M:%S")
+        ev.end = datetime.fromtimestamp(time_end - 28800).strftime("%Y-%m-%d %H:%M:%S")
+        ev.url = "https://powermentor.andrewyu.org/meeting/%s" % mid
+        ev.description = notes
+        print(ev.begin)
+        print(ev.end)
+        cal.events.add(ev)
+
+
+    response = make_response(cal.serialize())
+    response.headers["Content-Disposition"] = "attachment; filename=%s.ics" % username # BUG: Potential injection?
     return response
 
 
@@ -224,7 +245,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
     if request.method == "POST":
         # clean this part up a bit when you get to do so. pass unix timestamps around, not weird strings.
         try:
-            print(request.form)
             if "date" not in request.form:
                 date = ""
             else:
@@ -243,7 +263,12 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
             return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
         if end.timestamp() <= start.timestamp():
             snotes.append(
-                "Your previous submission was rejected because the end time is earlier than the start time. Butter fingers! I still don't want to use JavaScript, sue me."
+                "Your previous submission was rejected because the end time is earlier than the start time."
+            )
+            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
+        if end.timestamp() <= time():
+            snotes.append(
+                "Your previous submission was rejected because the end time is earlier than the current time."
             )
             return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
         if request.form["mode"] == "confirm":
@@ -456,6 +481,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
             "SELECT subjects FROM users WHERE username = ?", (username,)
         ).fetchall()[0][0],
         snotes=snotes,
+        username=username
     )
 
 
