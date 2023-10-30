@@ -194,7 +194,10 @@ def calendar(username: str) -> Response:
     for (mid, mentor, mentee, time_start, time_end, notes) in res:
         ev = ics.Event()
         if mentor == username:
-            penguin = get_lfmu(mentee)
+            if mentor.startswith("s"):
+                penguin = get_lfmu(mentee)
+            else:
+                penguin = ("X", "X", "X", "nobody")
             mode = "You are the mentor."
         elif mentee == username:
             penguin = get_lfmu(mentor)
