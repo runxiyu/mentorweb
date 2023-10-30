@@ -194,7 +194,7 @@ def calendar(username: str) -> Response:
     for (mid, mentor, mentee, time_start, time_end, notes) in res:
         ev = ics.Event()
         if mentor == username:
-            if mentor.startswith("s"):
+            if mentee.startswith("s"):
                 penguin = get_lfmu(mentee)
             else:
                 penguin = ("X", "X", "X", "nobody")
