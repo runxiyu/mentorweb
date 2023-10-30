@@ -48,7 +48,7 @@ header {
 
 .header-left img {
 	vertical-align: middle;
-    max-height: 50px;
+    max-height: 40px;
 }
 header a {
 	color: white;
@@ -144,11 +144,6 @@ form input:focus, textarea:focus {
 form textarea {
 	vertical-align: top;
 	height: 3em;
-}
-
-form:not([class="single-button"]) input[type="submit"] {
-	margin-top: 0.4em;
-	margin-left: 6.8em;
 }
 
 form button {
