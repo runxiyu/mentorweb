@@ -36,8 +36,8 @@ h2, h3, h4, h5, h6 {
 header {
 	position: -webkit-sticky;
 	position: sticky;
-	top: -5;
-	left: -5;
+	top: -20;
+	left: -20;
 	color: white;
 	background-color: rgb(20, 120, 20);
 	padding: 0.4em;
@@ -50,6 +50,7 @@ header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	margin: 0 auto;
 }
 
 header img {
