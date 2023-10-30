@@ -1,6 +1,6 @@
 html {
 	font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Inter", "Noto Sans SC", sans-serif;
-	line-height: 1.2;、
+	line-height: 1.2;
 	border-color: black;
 	color: black;
 	background-color: white;
@@ -39,7 +39,6 @@ header {
 	left: 0;
 	color: white;
 	background-color: rgb(20, 120, 20);
-	padding: 0.4em;
 	z-index: 1000;
 	width: 100%;
 }
@@ -56,6 +55,7 @@ header img {
 	vertical-align: middle;
 	max-height: 40px;
 }
+
 header a {
 	color: white;
 }
