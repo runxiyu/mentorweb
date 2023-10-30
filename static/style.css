@@ -20,6 +20,7 @@ body {
 
 a {
 	color: rgb(20, 120, 20);
+	text-decoration: none;
 }
 /*
 a.link {color: rgb(20, 120, 20);}
