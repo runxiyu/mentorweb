@@ -50,6 +50,7 @@ header {
 }
 
 .header-content {
+	margin: 0.4em;
 	max-width: 50rem;
 	display: flex;
 	justify-content: space-between;
@@ -67,12 +68,7 @@ header a {
 }
 
 header h1 {
-	margin: 0.4em;
 	font-size: 25px;
-}
-
-header p {
-	margin: 0.4em;
 }
 
 #snotes {
