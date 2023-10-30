@@ -1,16 +1,19 @@
 html {
 	font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Inter", "Noto Sans SC", sans-serif;
 	line-height: 1.2;
-	margin: 0;
-	padding: 0;
 	border-color: black;
 	color: black;
 	background-color: white;
 }
 
+body {
+	margin: 0;
+	padding: 0;
+}
+
 .content {
 	padding: 0.4em;
-	margin: 0 auto;
+	margin: 0.4em;
 	max-width: 50rem;
 }
 
