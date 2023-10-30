@@ -11,26 +11,19 @@
 	</h1>
 </header>
 <form action="/login" method="POST">
-	<table>
-		<tr>
-			<td>
-				<label for="username">Username</label>
-			</td>
-			<td>
-				<input type="text" id="username" name="username" required /><br />
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<label for="pass">Password</label>
-			</td>
-			<td>
-				<input type="password" id="password" name="password" required /><br />
-			</td>
-		</tr>
-	</table>
-        <input type="submit" value="Login"/>
-	<br />
+	<ul>
+		<li>
+			<label for="username">Username</label>
+			<input type="text" id="username" name="username" required /><br />
+		</li>
+		<li>
+			<label for="pass">Password</label>
+			<input type="password" id="password" name="password" required /><br />
+		</li>
+		<li>
+		    <input type="submit" value="Login"/>
+		</li>
+	</ul>
 	{{note}}
 </form>
 </body>

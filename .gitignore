@@ -1,1 +1,3 @@
 yay.db
+.mypy_cache
+.DS_Store

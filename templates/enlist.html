@@ -35,20 +35,28 @@ You are not currently registered for expertise in any subjects. Please <a href="
 {% endif %}
 
 <form action="/enlist" method="post">
+<ul>
 	<input type="hidden" name="mode" value="confirm" />
-	<label for="date">Date</label>
-	<input type="date" name="date">
-	<br />
-	<label for="start">Start</label>
-	<input type="time" name="start">
-	<br />
-	<label for="end">End</label>
-	<input type="time" name="end">
-	<br />
-	<label for="notes">Notes</label>
-	<textarea name="notes" rows="4" wrap="soft"></textarea>
-	<br />
-	<input type="submit" value="Proceed" />
+	<li>
+		<label for="date">Date</label>
+		<input type="date" name="date">
+	</li>
+	<li>
+		<label for="start">Start</label>
+		<input type="time" name="start">
+	</li>
+	<li>
+		<label for="end">End</label>
+		<input type="time" name="end">
+	</li>
+	<li>
+		<label for="notes">Notes</label>
+		<textarea name="notes" rows="4" wrap="soft"></textarea>
+	</li>
+	<li>
+		<input type="submit" value="Proceed" />
+	</li>
+</ul>
 </form> 
 
 {% elif mode == "confirm" %}
@@ -57,20 +65,22 @@ You are not currently registered for expertise in any subjects. Please <a href="
 Please confirm that the following information is correct. If it is not, press the "back" button in your browser. If it is, press "Enlist" at the bottom.
 </p>
 
-<p>
-Start:
-{{starts}}
-</p>
-<p>
-End:
-{{ends}}
-</p>
-<p>
-Notes:
-{{notes}}
-</p>
+<table>
+	<tr>
+		<th scope="row">Start</th>
+		<td>{{starts}}</td>
+	</tr>
+	<tr>
+		<th scope="row">End</th>
+		<td>{{ends}}</td>
+	</tr>
+	<tr>
+		<th scope="row">Notes</th>
+		<td>{{notes}}</td>
+	</tr>
+</table>
 
-<form action="/enlist" method="post">
+<form class="single-button" action="/enlist" method="post">
 	<input type="hidden" name="mode" value="confirmed" />
 	<input type="hidden" name="start" value="{{start}}" />
 	<input type="hidden" name="end" value="{{end}}" />
@@ -95,18 +105,21 @@ You have confirmed that you have time to perform mentoring activities during the
 <a href="/">Return home</a>
 </p>
 
-<p>
-Start:
-{{starts}}
-</p>
-<p>
-End:
-{{ends}}
-</p>
-<p>
-Notes:
-{{notes}}
-</p>
+<table>
+	<tr>
+		<th scope="row">Start</th>
+		<td>{{starts}}</td>
+	</tr>
+	<tr>
+		<th scope="row">End</th>
+		<td>{{ends}}</td>
+	</tr>
+	<tr>
+		<th scope="row">Notes</th>
+		<td>{{notes}}</td>
+	</tr>
+</table>
+
 
 {% else %}
 

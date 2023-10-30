@@ -52,15 +52,20 @@ Mentor: <a href="mailto:{{ other_lfmu[3] }}@ykpaoschool.cn">{{ other_lfmu[0] }},
 
 
 {% if role == "mentee" or role == "mentor" or role == "squishist" %}
-<p>
-Notes: {% if notes %} {{ notes }} {% else %} None {% endif %}
-</p>
-<p>
-Start: {{ time_start }}
-</p>
-<p>
-End: {{ time_end }}
-</p>
+<table>
+	<tr>
+		<th scope="row">Notes</th>
+		<td>{% if notes %} {{ notes }} {% else %} None {% endif %}</td>
+	</tr>
+	<tr>
+		<th scope="row">Start</th>
+		<td>{{ time_start }}</td>
+	</tr>
+	<tr>
+		<th scope="row">End</th>
+		<td>{{ time_end }}</td>
+	</tr>
+</table>
 {% endif %}
 
 {% if role == "mentee" or role == "mentor" %}
@@ -69,9 +74,15 @@ End: {{ time_end }}
 <form action="/" method="post">
 	<input type="hidden" name="action" value="deregister_meeting" />
 	<input type="hidden" name="mid" value="{{ mid }}" />
-	<label for="reason">Reason</label><br />
-	<textarea name="reason" rows="4" wrap="soft"></textarea><br />
-	<input type="submit" value="Deregister Meeting" />
+	<ul>
+		<li>
+			<label for="reason">Reason</label>
+			<textarea name="reason" rows="4" wrap="soft"></textarea>
+		</li>
+		<li>
+			<input type="submit" value="Deregister Meeting" />
+		</li>
+	</ul>
 </form> 
 </div>
 {% elif role == "squishist" %}
@@ -80,9 +91,15 @@ End: {{ time_end }}
 <form action="/" method="post">
 	<input type="hidden" name="action" value="register_meeting" />
 	<input type="hidden" name="mid" value="{{ mid }}" />
-	<label for="Comment">Comment</label><br />
-	<textarea name="comment" rows="4" wrap="soft"></textarea><br />
-	<input type="submit" value="Register Meeting" />
+	<ul>
+		<li>
+			<label for="Comment">Comment</label>
+			<textarea name="comment" rows="4" wrap="soft"></textarea>
+		</li>
+		<li>
+			<input type="submit" value="Register Meeting" />
+		</li>
+	</ul>
 </form> 
 </div>
 {% endif %}
