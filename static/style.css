@@ -1,10 +1,14 @@
 html {
 	font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Inter", "Noto Sans SC", sans-serif;
-	margin: 0 auto;
 	line-height: 1.2;
 	border-color: black;
 	color: black;
 	background-color: white;
+}
+
+.content {
+	margin: 0 auto;
+	max-width: 60rem;
 }
 
 hr {
@@ -66,10 +70,6 @@ header h1 {
 
 header p {
 	margin: 0.4em;
-}
-
-.content {
-	max-width: 60rem;
 }
 
 #snotes {
