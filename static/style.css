@@ -1,6 +1,7 @@
 html {
 	font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Inter", "Noto Sans SC", sans-serif;
 	line-height: 1.2;
+	margin: 0 auto;
 	border-color: black;
 	color: black;
 	background-color: white;
@@ -29,10 +30,6 @@ a.active {color: rgb(20, 120, 20);}
 
 h2, h3, h4, h5, h6 {
 	margin-top: 2rem;
-}
-
-iframe {
-	border: 1px solid;
 }
 
 header {
