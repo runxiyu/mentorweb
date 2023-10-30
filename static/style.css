@@ -125,6 +125,16 @@ tr:nth-child(odd) td {
   background-color: rgb(250, 250, 250);
 }
 
+.calendar-row {
+	vertical-align: top;
+	height: 6em;
+}
+
+.month {
+	color: rgb(20, 120, 20);
+	font-weight: bold;
+}
+
 form:not([class="single-button"]) {
 	margin-top: 0.4em;
 	margin-bottom: 0.4em;
