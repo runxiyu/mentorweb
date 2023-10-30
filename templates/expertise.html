@@ -7,14 +7,17 @@
 <body>
 
 <header>
+<div class="header-content">
 	<div class="header-left">
 		<h1><a href="/"><img src="/static/peer-pao-white.png" title="Peer Pao"> Peer Pao</a></h1>
 	</div>
 	<div class="header-right">
 		<p><a href="/login">{{lfmu[0]}}, {{lfmu[1]}} {{lfmu[2]}}</a></p>
 	</div>
+</div>
 </header>
 
+<div class="content">
 {% if snotes %}
 <div id="snotes">
 {% for snote in snotes %}
@@ -46,6 +49,7 @@ You are not currently registered for expertise in any subjects.
 		</li>
 	</ul>
 </form> 
+</div>
 
 </body>
 </html>
