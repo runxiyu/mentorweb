@@ -39,6 +39,34 @@ iframe {
 	border: 1px solid;
 }
 
+header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    color: white;
+    background-color: rgb(20, 120, 20);
+    padding: 0.4em;
+    z-index: 1000;
+    margin-bottom: 1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left img {
+	vertical-align: middle;
+    max-height: 50px;
+}
+
+header h1 {
+	margin: 0.4em;
+    font-size: 25px;
+}
+
+header p {
+	margin: 0.4em;
+}
+
 table {
 	margin-top: 0.4em;
 	margin-bottom: 0.4em;
