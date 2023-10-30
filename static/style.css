@@ -12,7 +12,8 @@ body {
 }
 
 .content {
-	padding: 1rem;
+	padding-left: 1rem;
+	padding-right: 1rem;
 	margin: 1rem auto;
 	max-width: 50rem;
 }
@@ -161,7 +162,7 @@ form label {
 
 form input:not([type="submit"]), textarea {
 	font: 1em sans-serif;
-	width: auto;
+	width: 60%;
 	box-sizing: border-box;
 	border: 1px solid #999;
 }
