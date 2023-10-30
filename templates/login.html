@@ -32,11 +32,23 @@ This login page is for existing users who would like to login with their existin
 			<input type="password" id="password" name="password" required /><br />
 		</li>
 		<li>
+			<label for="mode">Mode</label>
+			<input type="radio" name="mode" value="login" checked>Login</input>
+			<input type="radio" name="mode" value="psauth">PowerSchool</input>
+		</li>
+		<li>
 			<label></label>
-		    <input type="submit" value="Login"/>
+			<input type="submit" value="Submit"/>
 		</li>
 	</ul>
+	{% if note %}
+	<p style="border: 1px solid red; padding: 0px 2px;">
 	{{note}}
+	</p>
+	{% endif %}
+	<p>
+	Please choose “Login” if you have used this system before and you just want to log in normally. Please choose “PowerSchool” if you need to update your password or if this is your initial registration. In this case you should use your PowerSchool password and the process may take time as PowerSchool must be contacted to check the password.
+	</p>
 </form>
 </div>
 </body>

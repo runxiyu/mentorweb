@@ -2,7 +2,6 @@
 
 Features:
 - List subject support
-- Calendar support!
 - CCA and study hall time choices
 
 Programatic quality:
@@ -14,4 +13,3 @@ Quality of life:
 - Check for time overlaps
 - Remove the idiotic shit when enlisting meetings
 - What should I deal with expired meetings?
-- Same page for PowerSchool and normal logins
