@@ -554,7 +554,7 @@ def login() -> Union[Response, werkzeugResponse, str]:
     session_id = token_urlsafe(16)
     record_cookie(username, session_id)
     response = make_response(redirect("/"))
-    response.set_cookie("session-id", session_id)
+    response.set_cookie("session-id", session_id, secure=True, httponly=True)
     return response
 
 
