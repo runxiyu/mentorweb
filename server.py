@@ -197,19 +197,20 @@ def calendar(username: str) -> Response:
             if mentee:
                 penguin = get_lfmu(mentee)
             else:
-                penguin = ("X", "X", "X", "nobody")
+                penguin = None
             mode = "You are the mentor."
         elif mentee == username:
             penguin = get_lfmu(mentor)
             mode = "You are the mentee."
-        ev.name = "%s, %s %s" % (penguin[0], penguin[1], penguin[2])
-        ev.organizer = ics.Organizer("%s@ykpaoschool.cn" % penguin[3])
+        if penguin:
+            ev.name = "%s, %s %s" % (penguin[0], penguin[1], penguin[2])
+            ev.organizer = ics.Organizer("%s@ykpaoschool.cn" % penguin[3])
+        else:
+            ev.name = "Mentoring placeholder"
         ev.begin = datetime.fromtimestamp(time_start - 28800).strftime("%Y-%m-%d %H:%M:%S")
         ev.end = datetime.fromtimestamp(time_end - 28800).strftime("%Y-%m-%d %H:%M:%S")
         ev.url = "https://powermentor.andrewyu.org/meeting/%s" % mid
         ev.description = mode + "\n" + notes
-        print(ev.begin)
-        print(ev.end)
         cal.events.add(ev)
 
 
