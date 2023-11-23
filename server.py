@@ -556,7 +556,7 @@ def login() -> Union[Response, werkzeugResponse, str]:
         try:
             lastname, firstname, middlename = check_powerschool(request.form["username"], request.form["password"])
         except AuthenticationFault:
-            return render_template("psauth.html", note="Error: Invalid PowerSchool credentials (or maybe you just have an unusual name that my regular expression fails to parse).")
+            return render_template("login.html", note="Error: Invalid PowerSchool credentials (or maybe you just have an unusual name that my regular expression fails to parse).")
         username = request.form["username"]
         password = request.form["password"]
         lf = len(con.execute("SELECT username FROM users WHERE username = ?", (username,)).fetchall())
