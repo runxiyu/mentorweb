@@ -23,7 +23,12 @@
 # Test for time overlaps.
 # Redirect to login page, but allow coming back somehow? Perhaps a Referrer header.
 
+
 from __future__ import annotations
+
+PRODUCTION = False
+# Non-HTTPS requests will not work if in production mode.
+
 from typing import Union, Optional, Tuple, List
 from markupsafe import Markup
 from flask import (
@@ -45,6 +50,9 @@ from argon2.exceptions import VerifyMismatchError
 from jinja2 import StrictUndefined
 import sqlite3
 import requests
+import logging
+logging.basicConfig(level=logging.DEBUG)
+# logging.getLogger("werkzeug").setLevel(logging.WARNING)
 import ics
 import re
 
@@ -343,8 +351,8 @@ def register() -> Union[str, Response, werkzeugResponse]:
             datetime.fromtimestamp(i[3]).strftime("%c"),
         )
         for i in con.execute(
-            "SELECT mid, mentor, time_start, time_end FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''",
-            (username,),
+            "SELECT mid, mentor, time_start, time_end FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = '' AND time_end > ?",
+            (username, time()),
         ).fetchall()
     ]
 
@@ -432,7 +440,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
                     )
                 elif username == res[0][0]:
                     snotes.append(
-                        "??? why are you trying to register your own session, this is not discovery in civil litigations you can stop fighting yourself <3"
+                        "NEIN DANKE"
                     )
                 else:
                     assert (
@@ -516,24 +524,35 @@ def check_powerschool(username: str, password: str) -> tuple[str, str, str]:
 @app.route("/login", methods=["GET", "POST"])
 def login() -> Union[Response, werkzeugResponse, str]:
     if request.method == "GET":
+        logging.debug("GET on /login")
         try:
+            logging.debug("session-id %s" % request.cookies.get("session-id") or "none")
             username = check_cookie(request.cookies.get("session-id"))
+            logging.debug("username yes %s" % username)
         except AuthenticationFault:
+            # this is normal as they're probably first retreiving /login with GET
             return render_template("login.html", note="")
         else:
             return render_template(
                 "login.html",
                 note=f'Note: You are already logged in as "{username}". Use this form to login as another user.',
             )
-    elif not ("mode" in request.form and "username" in request.form and "password" in request.form):
+    logging.debug("POST on /login")
+    if not ("mode" in request.form and "username" in request.form and "password" in request.form):
         return "you should squish more penguins"
     if request.form["mode"] == "login":
+        logging.debug("Mode login")
         try:
+            logging.debug("checking login %s %s" % (request.form["username"], request.form["password"]) )
             check_login(request.form["username"], request.form["password"])
+            logging.debug("success")
+            # should continue to cookie-setter
         except AuthenticationFault:
+            logging.debug("fail")
             return render_template("login.html", note="Error: Invalid credentials.")
         username = request.form["username"]
     elif request.form["mode"] == "psauth":
+        logging.debug("Mode psauth")
         try:
             lastname, firstname, middlename = check_powerschool(request.form["username"], request.form["password"])
         except AuthenticationFault:
@@ -550,12 +569,15 @@ def login() -> Union[Response, werkzeugResponse, str]:
             assert con.execute("INSERT INTO users (username, argon2, lastname, firstname, middlename) VALUES (?, ?, ?, ?, ?)", (username, PasswordHasher().hash(password), lastname, firstname, middlename)).rowcount == 1
             con.commit()
     else:
-        return "are you mr mullan please stop"
+        return "donald trump ate my pufferfish!!1"
 
     session_id = token_urlsafe(16)
+    logging.debug("setting session-id %s" % session_id)
     record_cookie(username, session_id)
+    logging.debug("recorded cookie... supposedly")
     response = make_response(redirect("/"))
-    response.set_cookie("session-id", session_id, secure=True, httponly=True)
+    response.set_cookie("session-id", session_id, secure=PRODUCTION, httponly=True)
+    logging.debug("set cookie... supposedly")
     return response
 
 
