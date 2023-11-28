@@ -33,9 +33,10 @@
 			<table>
 			<tr>
 				<th scope="col">Mentor</th>
-				<th scope="col">Subjects</th>
+				<th scope="col">Mentor's Subjects</th>
 				<th scope="col">Start</th>
 				<th scope="col">End</th>
+				<th scope="col">Notes</th>
 				<th scope="col">Actions</th>
 			</tr>
 			{% for i in available_meetings %}
@@ -44,6 +45,7 @@
 					<td>{{ i[2] }}</td>
 					<td>{{ i[3] }}</td>
 					<td>{{ i[4] }}</td>
+					<td>{{ i[5] }}</td>
 					<td>
 						<a href="/meeting/{{ i[0] }}">
 						View
@@ -53,7 +55,9 @@
 			{% endfor %}
 			</table>
 	{% else %}
-		There are no available meetings. 你们都太卷了，或者是，mentor 太少了……悲
+		<p>
+		There are no available meetings. 你们都太卷了，或者是，mentor 太少了……
+		</p>
 	{% endif %}
 </div>
 </body>
