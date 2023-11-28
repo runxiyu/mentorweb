@@ -51,6 +51,7 @@ from jinja2 import StrictUndefined
 import sqlite3
 import requests
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 # logging.getLogger("werkzeug").setLevel(logging.WARNING)
 import ics
@@ -95,11 +96,13 @@ def check_cookie(cookie: Optional[str]) -> str:
     if not cookie:
         raise AuthenticationFault("cookie", cookie)
     res = con.execute(
-        "SELECT username, cookietime FROM users WHERE cookie = ?", (cookie,)
+        "SELECT username, cookietime FROM users WHERE cookie = ?",
+        (cookie,),
     ).fetchall()
     if len(res) > 1:
         raise ValueError(
-            "database contains multiple entries of the same cookie", cookie
+            "database contains multiple entries of the same cookie",
+            cookie,
         )
     elif len(res) == 1:
         username, cookietime = res[0]
@@ -162,7 +165,9 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     ).fetchall()
     assert len(res) <= 1
     if len(res) == 0:  # meeting does not exist
-        return render_template("meeting.html", role="bad", snotes=snotes, lfmu=lfmu)
+        return render_template(
+            "meeting.html", role="bad", snotes=snotes, lfmu=lfmu
+        )
     mentor, mentee, time_start, time_end, notes = res[0]
     if username == mentor:
         role = "mentor"
@@ -196,10 +201,13 @@ def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
 @app.route("/<username>.ics")
 def calendar(username: str) -> Response:
     cal = ics.Calendar()
-    
-    res = con.execute("SELECT mid, mentor, mentee, time_start, time_end, notes FROM meetings WHERE mentor = ? or mentee = ?", (username, username)).fetchall()
 
-    for (mid, mentor, mentee, time_start, time_end, notes) in res:
+    res = con.execute(
+        "SELECT mid, mentor, mentee, time_start, time_end, notes FROM meetings WHERE mentor = ? or mentee = ?",
+        (username, username),
+    ).fetchall()
+
+    for mid, mentor, mentee, time_start, time_end, notes in res:
         ev = ics.Event()
         if mentor == username:
             if mentee:
@@ -212,18 +220,25 @@ def calendar(username: str) -> Response:
             mode = "You are the mentee."
         if penguin:
             ev.name = "%s, %s %s" % (penguin[0], penguin[1], penguin[2])
-            ev.organizer = ics.Organizer("%s@ykpaoschool.cn" % penguin[3])
+            ev.organizer = ics.Organizer(
+                "%s@ykpaoschool.cn" % penguin[3]
+            )
         else:
             ev.name = "Mentoring placeholder"
-        ev.begin = datetime.fromtimestamp(time_start - 28800).strftime("%Y-%m-%d %H:%M:%S")
-        ev.end = datetime.fromtimestamp(time_end - 28800).strftime("%Y-%m-%d %H:%M:%S")
+        ev.begin = datetime.fromtimestamp(time_start - 28800).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+        ev.end = datetime.fromtimestamp(time_end - 28800).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         ev.url = "https://powermentor.andrewyu.org/meeting/%s" % mid
         ev.description = mode + "\n" + notes
         cal.events.add(ev)
 
-
     response = make_response(cal.serialize())
-    response.headers["Content-Disposition"] = "attachment; filename=%s.ics" % username # BUG: Potential injection?
+    response.headers["Content-Disposition"] = (
+        "attachment; filename=%s.ics" % username
+    )  # BUG: Potential injection?
     return response
 
 
@@ -253,7 +268,9 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
     except AuthenticationFault:
         return redirect("/login")
     lfmu = get_lfmu(username)
-    subjects = con.execute( "SELECT subjects FROM users WHERE username = ?", (username,)).fetchall()[0][0]
+    subjects = con.execute(
+        "SELECT subjects FROM users WHERE username = ?", (username,)
+    ).fetchall()[0][0]
     if request.method == "POST":
         # clean this part up a bit when you get to do so. pass unix timestamps around, not weird strings.
         try:
@@ -261,28 +278,56 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 date = ""
             else:
                 date = request.form["date"] + " "
-            start = datetime.strptime(date + request.form["start"], "%Y-%m-%d %H:%M")
-            end = datetime.strptime(date + request.form["end"], "%Y-%m-%d %H:%M")
+            start = datetime.strptime(
+                date + request.form["start"], "%Y-%m-%d %H:%M"
+            )
+            end = datetime.strptime(
+                date + request.form["end"], "%Y-%m-%d %H:%M"
+            )
         except ValueError:
             snotes.append(
                 "Your previous submission was rejected because the date or time formats were unreadable."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
+            return render_template(
+                "enlist.html",
+                lfmu=lfmu,
+                snotes=snotes,
+                mode="fill",
+                subjects=subjects,
+            )
         except KeyError:
             snotes.append(
                 "Your previous submission was rejected because the request did not contain the necessary fields."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
+            return render_template(
+                "enlist.html",
+                lfmu=lfmu,
+                snotes=snotes,
+                mode="fill",
+                subjects=subjects,
+            )
         if end.timestamp() <= start.timestamp():
             snotes.append(
                 "Your previous submission was rejected because the end time is earlier than the start time."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
+            return render_template(
+                "enlist.html",
+                lfmu=lfmu,
+                snotes=snotes,
+                mode="fill",
+                subjects=subjects,
+            )
         if end.timestamp() <= time():
             snotes.append(
                 "Your previous submission was rejected because the end time is earlier than the current time."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects)
+            return render_template(
+                "enlist.html",
+                lfmu=lfmu,
+                snotes=snotes,
+                mode="fill",
+                subjects=subjects,
+            )
         if request.form["mode"] == "confirm":
             return render_template(
                 "enlist.html",
@@ -322,9 +367,21 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
             snotes.append(
                 "Why was this even in a POST request? I'm letting you go this time..."
             )
-            return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects,)
+            return render_template(
+                "enlist.html",
+                lfmu=lfmu,
+                snotes=snotes,
+                mode="fill",
+                subjects=subjects,
+            )
     elif request.method == "GET":
-        return render_template("enlist.html", lfmu=lfmu, snotes=snotes, mode="fill", subjects=subjects,)
+        return render_template(
+            "enlist.html",
+            lfmu=lfmu,
+            snotes=snotes,
+            mode="fill",
+            subjects=subjects,
+        )
     else:
         raise GeneralFault()
 
@@ -439,9 +496,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
                         "The meeting you were trying to register disappeared, perhaps someone registered it just now, or the mentor deleted it?"
                     )
                 elif username == res[0][0]:
-                    snotes.append(
-                        "NEIN DANKE"
-                    )
+                    snotes.append("NEIN DANKE")
                 else:
                     assert (
                         con.execute(
@@ -455,7 +510,8 @@ def index() -> Union[str, Response, werkzeugResponse]:
                     )
                     con.commit()
                     snotes.append(
-                        "You have registered for meeting %s" % request.form["mid"]
+                        "You have registered for meeting %s"
+                        % request.form["mid"]
                     )
                     # somehow notify mentor
             else:
@@ -466,9 +522,14 @@ def index() -> Union[str, Response, werkzeugResponse]:
     lfmu = get_lfmu(username)
 
     meetings_as_mentee = [
-        (i[0], get_lfmu(i[1]), datetime.fromtimestamp(i[2]).strftime("%c"))
+        (
+            i[0],
+            get_lfmu(i[1]),
+            datetime.fromtimestamp(i[2]).strftime("%c"),
+        )
         for i in con.execute(
-            "SELECT mid, mentor, time_start FROM meetings WHERE mentee = ?", (username,)
+            "SELECT mid, mentor, time_start FROM meetings WHERE mentee = ?",
+            (username,),
         ).fetchall()
     ]
 
@@ -479,7 +540,8 @@ def index() -> Union[str, Response, werkzeugResponse]:
             datetime.fromtimestamp(i[2]).strftime("%c"),
         )
         for i in con.execute(
-            "SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?", (username,)
+            "SELECT mid, mentee, time_start FROM meetings WHERE mentor = ?",
+            (username,),
         ).fetchall()
     ]
 
@@ -493,13 +555,15 @@ def index() -> Union[str, Response, werkzeugResponse]:
             "SELECT subjects FROM users WHERE username = ?", (username,)
         ).fetchall()[0][0],
         snotes=snotes,
-        username=username
+        username=username,
     )
 
 
-def check_powerschool(username: str, password: str) -> tuple[str, str, str]:
+def check_powerschool(
+    username: str, password: str
+) -> tuple[str, str, str]:
     ss = requests.Session()
-    
+
     rq = ss.post(
         "https://powerschool.ykpaoschool.cn/guardian/home.html",
         data={
@@ -510,9 +574,14 @@ def check_powerschool(username: str, password: str) -> tuple[str, str, str]:
         },
     )
 
-    html = ss.get("https://powerschool.ykpaoschool.cn/guardian/home.html").text
+    html = ss.get(
+        "https://powerschool.ykpaoschool.cn/guardian/home.html"
+    ).text
 
-    match = re.search(r"<h1>Grades and Attendance: ([A-Za-z]+), ([A-Za-z]+) (.*)</h1>", html)
+    match = re.search(
+        r"<h1>Grades and Attendance: ([A-Za-z]+), ([A-Za-z]+) (.*)</h1>",
+        html,
+    )
 
     if not match:
         raise AuthenticationFault
@@ -520,13 +589,15 @@ def check_powerschool(username: str, password: str) -> tuple[str, str, str]:
     return match.group(1), match.group(2), match.group(3)
 
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login() -> Union[Response, werkzeugResponse, str]:
     if request.method == "GET":
         logging.debug("GET on /login")
         try:
-            logging.debug("session-id %s" % request.cookies.get("session-id") or "none")
+            logging.debug(
+                "session-id %s" % request.cookies.get("session-id")
+                or "none"
+            )
             username = check_cookie(request.cookies.get("session-id"))
             logging.debug("username yes %s" % username)
         except AuthenticationFault:
@@ -538,35 +609,80 @@ def login() -> Union[Response, werkzeugResponse, str]:
                 note=f'Note: You are already logged in as "{username}". Use this form to login as another user.',
             )
     logging.debug("POST on /login")
-    if not ("mode" in request.form and "username" in request.form and "password" in request.form):
+    if not (
+        "mode" in request.form
+        and "username" in request.form
+        and "password" in request.form
+    ):
         return "you should squish more penguins"
     if request.form["mode"] == "login":
         logging.debug("Mode login")
         try:
-            logging.debug("checking login %s %s" % (request.form["username"], request.form["password"]) )
-            check_login(request.form["username"], request.form["password"])
+            logging.debug(
+                "checking login %s %s"
+                % (request.form["username"], request.form["password"])
+            )
+            check_login(
+                request.form["username"], request.form["password"]
+            )
             logging.debug("success")
             # should continue to cookie-setter
         except AuthenticationFault:
             logging.debug("fail")
-            return render_template("login.html", note="Error: Invalid credentials.")
+            return render_template(
+                "login.html", note="Error: Invalid credentials."
+            )
         username = request.form["username"]
     elif request.form["mode"] == "psauth":
         logging.debug("Mode psauth")
         try:
-            lastname, firstname, middlename = check_powerschool(request.form["username"], request.form["password"])
+            lastname, firstname, middlename = check_powerschool(
+                request.form["username"], request.form["password"]
+            )
         except AuthenticationFault:
-            return render_template("login.html", note="Error: Invalid PowerSchool credentials (or maybe you just have an unusual name that my regular expression fails to parse).")
+            return render_template(
+                "login.html",
+                note="Error: Invalid PowerSchool credentials (or maybe you just have an unusual name that my regular expression fails to parse).",
+            )
         username = request.form["username"]
         password = request.form["password"]
-        lf = len(con.execute("SELECT username FROM users WHERE username = ?", (username,)).fetchall())
+        lf = len(
+            con.execute(
+                "SELECT username FROM users WHERE username = ?",
+                (username,),
+            ).fetchall()
+        )
         if lf > 1:
             raise DatabaseFault(username)
         elif lf == 1:
-            assert con.execute("UPDATE users SET argon2 = ?, lastname = ?, firstname = ?, middlename = ? WHERE username = ?", (PasswordHasher().hash(password), lastname, firstname, middlename, username)).rowcount == 1
+            assert (
+                con.execute(
+                    "UPDATE users SET argon2 = ?, lastname = ?, firstname = ?, middlename = ? WHERE username = ?",
+                    (
+                        PasswordHasher().hash(password),
+                        lastname,
+                        firstname,
+                        middlename,
+                        username,
+                    ),
+                ).rowcount
+                == 1
+            )
             con.commit()
         elif lf == 0:
-            assert con.execute("INSERT INTO users (username, argon2, lastname, firstname, middlename) VALUES (?, ?, ?, ?, ?)", (username, PasswordHasher().hash(password), lastname, firstname, middlename)).rowcount == 1
+            assert (
+                con.execute(
+                    "INSERT INTO users (username, argon2, lastname, firstname, middlename) VALUES (?, ?, ?, ?, ?)",
+                    (
+                        username,
+                        PasswordHasher().hash(password),
+                        lastname,
+                        firstname,
+                        middlename,
+                    ),
+                ).rowcount
+                == 1
+            )
             con.commit()
     else:
         return "donald trump ate my pufferfish!!1"
@@ -576,10 +692,11 @@ def login() -> Union[Response, werkzeugResponse, str]:
     record_cookie(username, session_id)
     logging.debug("recorded cookie... supposedly")
     response = make_response(redirect("/"))
-    response.set_cookie("session-id", session_id, secure=PRODUCTION, httponly=True)
+    response.set_cookie(
+        "session-id", session_id, secure=PRODUCTION, httponly=True
+    )
     logging.debug("set cookie... supposedly")
     return response
-
 
 
 if __name__ == "__main__":
