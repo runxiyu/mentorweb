@@ -406,6 +406,7 @@ def register() -> Union[str, Response, werkzeugResponse]:
             ).fetchall()[0][0],
             datetime.fromtimestamp(i[2]).strftime("%c"),
             datetime.fromtimestamp(i[3]).strftime("%c"),
+            i[4]
         )
         for i in con.execute(
             "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = '' AND time_end > ?",

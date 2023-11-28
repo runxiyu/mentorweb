@@ -15,7 +15,7 @@ body {
 	padding-left: 1rem;
 	padding-right: 1rem;
 	margin: 1rem auto;
-	max-width: 50rem;
+	max-width: 70rem;
 }
 
 hr {
@@ -52,7 +52,7 @@ header {
 .header-content {
 	padding-left: 1em;
 	padding-right: 1em;
-	max-width: 50rem;
+	max-width: 70rem;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
