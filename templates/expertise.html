@@ -28,28 +28,27 @@
 </div>
 {% endif %}
 
-{% if subjects %}
-<p>
-You are currently registered for expertise in: {{ subjects }}.
-</p>
-{% else %}
-<p>
-You are not currently registered for expertise in any subjects.
-</p>
-{% endif %}
-
-<form action="/" method="post">
+<form class="plain" action="/" method="post">
 	<input type="hidden" name="action" value="expertise" />
-	<ul>
-		<li>
-			<label for="expertise">Update</label>
-			<input type="text" name="expertise"/>
-		</li>
-		<li>
+	<table>
+		{% for subjectid, subjectname, checked in subjects %}
+			<tr>
+				<td>
+				{% if checked %}
+				<input id="{{subjectid}}" type="checkbox" name="expertise" checked value="{{subjectid}}" />
+				{% else %}
+				<input id="{{subjectid}}" type="checkbox" name="expertise" value="{{subjectid}}" />
+				{% endif %}
+				</td>
+				<td>
+				<label for="{{subjectid}}">{{subjectname}}</label>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
 			<label></label>
 			<input type="submit" value="Submit" />
-		</li>
-	</ul>
+	<!--TODO: Fix CSS-->
 </form> 
 </div>
 

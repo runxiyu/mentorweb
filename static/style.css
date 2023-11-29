@@ -132,7 +132,7 @@ tr:nth-child(odd) td {
 	font-weight: bold;
 }
 
-form:not([class="single-button"]) {
+form:not([class="plain"]) {
 	margin-top: 0.4em;
 	margin-bottom: 0.4em;
 	padding: 0.4em;
@@ -141,24 +141,24 @@ form:not([class="single-button"]) {
 	font-size: 90%;
 }
 
-form ul {
+form:not([class="plain"]) ul {
 	list-style: none;
 	padding: 0;
 	margin: 0;
 }
 
-form li + li {
+form:not([class="plain"]) li + li {
 	margin-top: 0.2em;
 }
 
-form label {
+form:not([class="plain"]) label {
 	display: inline-block;
 	width: 6em;
 	text-align: right;
 	font-weight: bold;
 }
 
-form input:not([type="submit"]), textarea {
+form:not([class="plain"]) input:not([type="submit"]), textarea {
 	font: 1em sans-serif;
 	width: auto;
 	max-width: 75%;
@@ -166,15 +166,15 @@ form input:not([type="submit"]), textarea {
 	border: 1px solid #999;
 }
 
-form input:focus, textarea:focus {
+form:not([class="plain"]) input:focus, textarea:focus {
 	border-color: rgb(20, 120, 20);
 }
 
-form textarea {
+form:not([class="plain"]) textarea {
 	vertical-align: top;
 	height: 3em;
 }
 
-form button {
+form:not([class="plain"]) button {
 	margin-left: 0.5em;
 }
