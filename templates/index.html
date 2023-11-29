@@ -59,9 +59,20 @@
 	<h2>
 		Meetings as mentor:
 	</h2>
+	{% if subjects %}
 	<p>
-	You teach the subjects: {% if subjects %}{{subjects}}{% else %}Nothing{%endif%}, <a href="/expertise">modify</a>
+	You are registered for teaching these subjects (<a href="/expertise">change them?</a>):
 	</p>
+	<ul>
+		{% for s in subjects %}
+		<li>{{ s }}</li>
+		{% endfor %}
+	</ul>
+	{% else %}
+	<p>
+	You are not registered to teach any subjects. Perhaps <a href="/expertise">modify</a>?
+	</p>
+	{% endif %}
 	<p>
 		<a href="/enlist">Enlist your time...</a>
 	</p>

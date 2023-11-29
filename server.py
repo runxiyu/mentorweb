@@ -421,9 +421,9 @@ def register() -> Union[str, Response, werkzeugResponse]:
         (
             i[0],
             get_lfmu(i[1]),
-            con.execute(
-                "SELECT subjects FROM users WHERE username = ?", (i[1],)
-            ).fetchall()[0][0],
+
+            [get_subjectname(sid) for sid in get_subjectids(i[1])],
+
             datetime.fromtimestamp(i[2]).strftime("%c"),
             datetime.fromtimestamp(i[3]).strftime("%c"),
             i[4],
@@ -498,12 +498,14 @@ def index() -> Union[str, Response, werkzeugResponse]:
                             % request.form["mid"]
                         )
             elif request.form["action"] == "expertise":
-                assert (
-                    con.execute(
-                        "UPDATE users SET subjects = ? WHERE username = ?",
-                        (request.form["expertise"], username),
-                    ).rowcount
-                    == 1
+                con.execute(
+                    "DELETE FROM subject_associations WHERE username = ?",
+                    (username,),
+                )
+                records = [(username, i) for i in request.form.getlist("expertise")]
+                con.executemany(
+                    "INSERT INTO subject_associations VALUES(?, ?)",
+                    records
                 )
                 con.commit()
                 snotes.append("You just updated your subject expertise")
@@ -537,7 +539,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
             else:
                 return "this is not american politics"
         except KeyError:
-            return "rishi sunak???"
+            raise
         pass  # TODO process stuff
     lfmu = get_lfmu(username)
 
@@ -571,9 +573,7 @@ def index() -> Union[str, Response, werkzeugResponse]:
         lfmu=lfmu,
         meetings_as_mentee=meetings_as_mentee,
         meetings_as_mentor=meetings_as_mentor,
-        subjects=con.execute(
-            "SELECT subjects FROM users WHERE username = ?", (username,)
-        ).fetchall()[0][0],
+        subjects=[get_subjectname(sid) for sid in get_subjectids(username)],
         snotes=snotes,
         username=username,
     )
