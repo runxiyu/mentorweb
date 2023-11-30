@@ -242,7 +242,7 @@ def get_subjectname(subjectid: str) -> str:
             "SELECT subjectname FROM subjects WHERE subjectid = ?", (subjectid,)
         ).fetchone()[0]
     except TypeError:
-        return '"' + str + '"'
+        return '"' + subjectid + '"'
     assert type(res) is str
     return res
 
