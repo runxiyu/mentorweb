@@ -237,9 +237,12 @@ def calendar(username: str) -> Response:
 
 
 def get_subjectname(subjectid: str) -> str:
-    res = con.execute(
-        "SELECT subjectname FROM subjects WHERE subjectid = ?", (subjectid,)
-    ).fetchone()[0]
+    try:
+        res = con.execute(
+            "SELECT subjectname FROM subjects WHERE subjectid = ?", (subjectid,)
+        ).fetchone()[0]
+    except TypeError:
+        return '"' + str + '"'
     assert type(res) is str
     return res
 
