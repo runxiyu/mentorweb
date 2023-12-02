@@ -449,6 +449,7 @@ def register() -> Union[str, Response, werkzeugResponse]:
             datetime.fromtimestamp(i[2]).strftime("%c"),
             datetime.fromtimestamp(i[3]).strftime("%c"),
             i[4],
+            get_yeargroup(i[1]),
         )
         for i in con.execute(
             "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = '' AND time_end > ?",
