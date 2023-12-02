@@ -451,27 +451,39 @@ def register() -> Union[str, Response, werkzeugResponse]:
         return "this is not british politics"
     lfmu = get_lfmu(username)
 
-    available_meetings = [
-        (
-            i[0],
-            get_lfmu(i[1]),
-            [get_subjectname(sid) for sid in get_subjectids(i[1])],
-            datetime.fromtimestamp(i[2]).strftime("%c"),
-            datetime.fromtimestamp(i[3]).strftime("%c"),
-            i[4],
-            get_yeargroup(i[1]),
-        )
-        if ALTLAW:
-            for i in con.execute(
-                "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''",
-                (username,),
-            ).fetchall()
-        else:
-            for i in con.execute(
-                "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = '' AND time_end > ?",
-                (username, time()),
-            ).fetchall()
-    ]
+    if not ALTLAW:
+        available_meetings = [
+            (
+                i[0],
+                get_lfmu(i[1]),
+                [get_subjectname(sid) for sid in get_subjectids(i[1])],
+                datetime.fromtimestamp(i[2]).strftime("%c"),
+                datetime.fromtimestamp(i[3]).strftime("%c"),
+                i[4],
+                get_yeargroup(i[1]),
+            )
+                for i in con.execute(
+                    "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = '' AND time_end > ?",
+                    (username, time()),
+                ).fetchall()
+        ]
+    
+    if ALTLAW:
+        available_meetings = [
+            (
+                i[0],
+                get_lfmu(i[1]),
+                [get_subjectname(sid) for sid in get_subjectids(i[1])],
+                datetime.fromtimestamp(i[2]).strftime("%c"),
+                datetime.fromtimestamp(i[3]).strftime("%c"),
+                i[4],
+                get_yeargroup(i[1]),
+            )
+                for i in con.execute(
+                    "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''",
+                    (username,),
+                ).fetchall()
+        ]
 
     # TODO
     return render_template(
