@@ -788,7 +788,7 @@ def impersonate() -> Union[Response, werkzeugResponse, str, tuple[str, int]]:
             users=[
                 (username, lastname + ", " + firstname + " " + middlename)
                 for (username, lastname, firstname, middlename) in con.execute(
-                    "SELECT username, lastname, firstname, middlename FROM users"
+                    "SELECT username, lastname, firstname, middlename FROM users ORDER BY lastname, firstname, middlename ASC"
                 ).fetchall()
             ],
         )
