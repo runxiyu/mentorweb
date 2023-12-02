@@ -712,10 +712,33 @@ def login() -> Union[Response, werkzeugResponse, str]:
     logging.debug("set cookie... supposedly")
     return response
 
+@app.route("/impersonate", methods=["GET", "POST"])
+def impersonate() -> Union[Response, werkzeugResponse, str]:
+    if not (request.remote_addr == "127.0.0.1" or check_cookie(request.cookies.get("session-id")) == "s22537"):
+        return "You may not access this resource.", 403
+    if request.method == "GET":
+        return render_template(
+            "impersonate.html",
+            users=[(username, lastname + ", " + firstname + " " + middlename) for (username, lastname, firstname, middlename) in con.execute("SELECT username, lastname, firstname, middlename FROM users").fetchall()]
+        )
+    # From now on it's POST
+    if not ("username" in request.form):
+        return "you cant impersonate god"
+    username = request.form["username"]
+    session_id = token_urlsafe(16)
+    logging.debug("setting session-id %s" % session_id)
+    record_cookie(username, session_id)
+    logging.debug("recorded cookie... supposedly")
+    response = make_response(redirect("/"))
+    response.set_cookie("session-id", session_id, secure=PRODUCTION, httponly=True)
+    logging.debug("set cookie... supposedly")
+    return response
+
+
 
 if __name__ == "__main__":
     try:
-        app.run(port=48139, debug=True)
+        app.run(port=48139, debug=(not PRODUCTION), use_reloader=(not PRODUCTION))
     finally:
         con.commit()
         con.close()

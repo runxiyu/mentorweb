@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impersonate – Peer Pao</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header>
+	<div class="header-content">
+		<div class="header-left">
+			<h1><a href="/"><img src="/static/peer-pao-white.png" title="Peer Pao"> Peer Pao</a></h1>
+		</div>
+		<div class="header-right">
+			<p>Impersonate</p>
+		</div>
+	</div>
+</header>
+<div class="content">
+<form class="plain" action="/impersonate" method="POST">
+	{% if users %}
+	<p>
+	You, the <i>sole administrator</i>, are about to impersonate an unsuspecting mentor.
+	</p>
+	<ul>
+		{% for user in users %}
+		<li>
+			<input type="radio" id="{{ user[0] }}" name="username" value="{{ user[0] }}" />
+			<label for="{{ user[0] }}"><code>{{ user[0] }}</code> {{ user[1] }}</label>
+		</li>
+		{% endfor %}
+	</ul>
+	<input type="submit" value="Impersonate"/>
+	{% else %}
+	<p>
+	There seem to be no users in the database?
+	</p>
+	{% endif %}
+</form>
+</div>
+</body>
+</html>
