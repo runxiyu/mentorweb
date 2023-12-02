@@ -26,10 +26,9 @@
 
 from __future__ import annotations
 
-PRODUCTION = False
-# Non-HTTPS requests will not work if in production mode.
-
+ADMINS = ["s22537", "s15155"]
 ALTLAW = True
+PRODUCTION = False # Non-HTTPS requests will not work if in production mode.
 
 from typing import Union, Optional, Tuple, List
 from markupsafe import Markup
@@ -779,9 +778,9 @@ def login() -> Union[Response, werkzeugResponse, str]:
 def impersonate() -> Union[Response, werkzeugResponse, str, tuple[str, int]]:
     if not (
         request.remote_addr == "127.0.0.1"
-        or check_cookie(request.cookies.get("session-id")) == "s22537"
+        or check_cookie(request.cookies.get("session-id")) in ADMINS
     ):
-        return "You may not access this resource.", 403
+        return "You may not access this resource. If you are an administrator, you must log in normally to your administrator account first, and only use /impersonate after logging in.", 403
     if request.method == "GET":
         return render_template(
             "impersonate.html",
