@@ -165,7 +165,7 @@ def get_lfmu(username: str) -> Tuple[str, str, str, str]:
 def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     snotes: List[Union[str, Markup]] = []
     if ALTLAW:
-        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
+        snotes.append("Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour.")
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -283,7 +283,7 @@ def get_subjectids(username: Optional[str] = None) -> list[str]:
 def expertise() -> Union[Response, werkzeugResponse, str]:
     snotes: List[Union[str, Markup]] = []
     if ALTLAW:
-        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
+        snotes.append("Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour.")
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -318,7 +318,7 @@ def expertise() -> Union[Response, werkzeugResponse, str]:
 def enlist() -> Union[Response, werkzeugResponse, str]:
     snotes: List[Union[str, Markup]] = []
     if ALTLAW:
-        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
+        snotes.append("Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour.")
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -442,7 +442,7 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
 def register() -> Union[str, Response, werkzeugResponse]:
     snotes: List[Union[str, Markup]] = []
     if ALTLAW:
-        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
+        snotes.append("Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour.")
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -498,7 +498,7 @@ def register() -> Union[str, Response, werkzeugResponse]:
 def index() -> Union[str, Response, werkzeugResponse]:
     snotes: List[Union[str, Markup]] = []
     if ALTLAW:
-        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
+        snotes.append("Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour.")
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
