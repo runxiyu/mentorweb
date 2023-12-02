@@ -29,6 +29,8 @@ from __future__ import annotations
 PRODUCTION = False
 # Non-HTTPS requests will not work if in production mode.
 
+ALTLAW = True
+
 from typing import Union, Optional, Tuple, List
 from markupsafe import Markup
 from flask import (
@@ -162,6 +164,8 @@ def get_lfmu(username: str) -> Tuple[str, str, str, str]:
 @app.route("/meeting/<mid>", methods=["GET", "POST"])
 def mview(mid: str) -> Union[Response, werkzeugResponse, str]:
     snotes: List[Union[str, Markup]] = []
+    if ALTLAW:
+        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -278,6 +282,8 @@ def get_subjectids(username: Optional[str] = None) -> list[str]:
 @app.route("/expertise")
 def expertise() -> Union[Response, werkzeugResponse, str]:
     snotes: List[Union[str, Markup]] = []
+    if ALTLAW:
+        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -311,6 +317,8 @@ def expertise() -> Union[Response, werkzeugResponse, str]:
 @app.route("/enlist", methods=["GET", "POST"])
 def enlist() -> Union[Response, werkzeugResponse, str]:
     snotes: List[Union[str, Markup]] = []
+    if ALTLAW:
+        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -433,6 +441,8 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
 @app.route("/register", methods=["GET", "POST"])
 def register() -> Union[str, Response, werkzeugResponse]:
     snotes: List[Union[str, Markup]] = []
+    if ALTLAW:
+        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
@@ -451,14 +461,16 @@ def register() -> Union[str, Response, werkzeugResponse]:
             i[4],
             get_yeargroup(i[1]),
         )
-#         for i in con.execute(
-#             "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = '' AND time_end > ?",
-#             (username, time()),
-#         ).fetchall()
-        for i in con.execute(
-            "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''",
-            (username,),
-        ).fetchall()
+        if ALTLAW:
+            for i in con.execute(
+                "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''",
+                (username,),
+            ).fetchall()
+        else:
+            for i in con.execute(
+                "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = '' AND time_end > ?",
+                (username, time()),
+            ).fetchall()
     ]
 
     # TODO
@@ -473,6 +485,8 @@ def register() -> Union[str, Response, werkzeugResponse]:
 @app.route("/", methods=["GET", "POST"])
 def index() -> Union[str, Response, werkzeugResponse]:
     snotes: List[Union[str, Markup]] = []
+    if ALTLAW:
+        snotes += "Alternate law is enabled for testing and demonstration &ndash; you may see unnecessary information (such as the inclusion of expired meetings) or other abnormal behaviour."
     try:
         username = check_cookie(request.cookies.get("session-id"))
     except AuthenticationFault:
