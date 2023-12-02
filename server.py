@@ -43,9 +43,6 @@ from flask import (
 )
 from werkzeug.wrappers.response import Response as werkzeugResponse
 from werkzeug.middleware.proxy_fix import ProxyFix
-app.wsgi_app = ProxyFix(
-    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
-)
 from datetime import datetime
 from time import time
 from secrets import token_urlsafe
@@ -62,6 +59,9 @@ import ics
 import re
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
 app.jinja_env.undefined = StrictUndefined
 
 con = sqlite3.connect("yay.db", check_same_thread=False)
