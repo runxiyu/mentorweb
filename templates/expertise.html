@@ -51,8 +51,24 @@
 			</tr>
 		{% endfor %}
 	</table>
-			<label></label>
-			<input type="submit" value="Submit" />
+	<p>
+	Please also tell me what year group you are in:
+	<input id="yNone" type="radio" name="year" value="None" {{y0checked}} />
+	<label for="yNone">None</label>
+	&nbsp;
+	<input id="y9" type="radio" name="year" value="Y9" {{y9checked}} />
+	<label for="y9">Y9</label>
+	&nbsp;
+	<input id="y10" type="radio" name="year" value="Y10" {{y10checked}} />
+	<label for="y10">Y10</label>
+	&nbsp;
+	<input id="y11" type="radio" name="year" value="Y11" {{y11checked}} />
+	<label for="y11">Y11</label>
+	&nbsp;
+	<input id="y12" type="radio" name="year" value="Y12" {{y12checked}} />
+	<label for="y12">Y12</label>
+	</p>
+	<input type="submit" value="Submit" />
 	<!--TODO: Fix CSS-->
 </form> 
 </div>

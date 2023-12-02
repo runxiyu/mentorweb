@@ -59,9 +59,7 @@ import ics
 import re
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(
-    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
-)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)  # type: ignore
 app.jinja_env.undefined = StrictUndefined
 
 con = sqlite3.connect("yay.db", check_same_thread=False)
@@ -133,6 +131,17 @@ def record_cookie(username: str, cookie: str) -> None:
 @app.route("/static/<path:path>", methods=["GET"])
 def static_(path: str) -> Response:
     return send_from_directory("static", path)
+
+
+def get_yeargroup(username: str) -> Optional[str]:
+    res = con.execute(
+        "SELECT year FROM users WHERE username = ?",
+        (username,),
+    ).fetchall()
+    if not res:
+        raise GeneralFault("checking year group of null username %s" % username)
+    assert (type(res[0][0]) is str) or (res[0][0] is None)
+    return res[0][0]
 
 
 def get_lfmu(username: str) -> Tuple[str, str, str, str]:
@@ -253,17 +262,13 @@ def get_subjectname(subjectid: str) -> str:
 
 def get_subjectids(username: Optional[str] = None) -> list[str]:
     if not username:
-        res = [
-            r[0]
-            for r in con.execute(
-                "SELECT subjectid FROM subjects"
-            ).fetchall()
-        ]
+        res = [r[0] for r in con.execute("SELECT subjectid FROM subjects").fetchall()]
     else:
         res = [
             r[0]
             for r in con.execute(
-                "SELECT subjectid FROM subject_associations WHERE username = ?", (username,)
+                "SELECT subjectid FROM subject_associations WHERE username = ?",
+                (username,),
             ).fetchall()
         ]
     assert type(res) is list
@@ -281,13 +286,25 @@ def expertise() -> Union[Response, werkzeugResponse, str]:
     lfmu = get_lfmu(username)
     subjectids = get_subjectids()
     subjectids_user = get_subjectids(username)
-    subjects = zip(subjectids, [get_subjectname(subjectid) for subjectid in subjectids], [(True if subjectid in subjectids_user else False) for subjectid in subjectids])
+    subjects = zip(
+        subjectids,
+        [get_subjectname(subjectid) for subjectid in subjectids],
+        [(True if subjectid in subjectids_user else False) for subjectid in subjectids],
+    )
+    year = get_yeargroup(username)
+    if not year:
+        year = "None"
 
     return render_template(
         "expertise.html",
         lfmu=lfmu,
         snotes=snotes,
         subjects=subjects,
+        y0checked="checked" if year == "None" else "",
+        y9checked="checked" if year == "Y9" else "",
+        y10checked="checked" if year == "Y10" else "",
+        y11checked="checked" if year == "Y11" else "",
+        y12checked="checked" if year == "Y12" else "",
     )
 
 
@@ -428,9 +445,7 @@ def register() -> Union[str, Response, werkzeugResponse]:
         (
             i[0],
             get_lfmu(i[1]),
-
             [get_subjectname(sid) for sid in get_subjectids(i[1])],
-
             datetime.fromtimestamp(i[2]).strftime("%c"),
             datetime.fromtimestamp(i[3]).strftime("%c"),
             i[4],
@@ -511,11 +526,27 @@ def index() -> Union[str, Response, werkzeugResponse]:
                 )
                 records = [(username, i) for i in request.form.getlist("expertise")]
                 con.executemany(
-                    "INSERT INTO subject_associations VALUES(?, ?)",
-                    records
+                    "INSERT INTO subject_associations VALUES(?, ?)", records
                 )
-                con.commit()
-                snotes.append("You just updated your subject expertise")
+                year = request.form.get("year", "None")
+                if year in ["None", "Y9", "Y10", "Y11", "Y12"]:
+                    con.execute(
+                        "UPDATE users SET year = ? WHERE USERNAME = ?",
+                        (year, username),
+                    )
+                    explode = False
+                else:
+                    explode = True
+                if explode:
+                    con.rollback()
+                    snotes.append(
+                        "That's not a valid year group, you might want to try again."
+                    )
+                else:
+                    con.commit()  # Not really
+                    snotes.append(
+                        "You just submitted your subject expertise and year group"
+                    )
             elif request.form["action"] == "register_meeting":
                 res = con.execute(
                     "SELECT mentor, mentee FROM meetings WHERE mid = ?",
@@ -712,14 +743,23 @@ def login() -> Union[Response, werkzeugResponse, str]:
     logging.debug("set cookie... supposedly")
     return response
 
+
 @app.route("/impersonate", methods=["GET", "POST"])
-def impersonate() -> Union[Response, werkzeugResponse, str]:
-    if not (request.remote_addr == "127.0.0.1" or check_cookie(request.cookies.get("session-id")) == "s22537"):
+def impersonate() -> Union[Response, werkzeugResponse, str, tuple[str, int]]:
+    if not (
+        request.remote_addr == "127.0.0.1"
+        or check_cookie(request.cookies.get("session-id")) == "s22537"
+    ):
         return "You may not access this resource.", 403
     if request.method == "GET":
         return render_template(
             "impersonate.html",
-            users=[(username, lastname + ", " + firstname + " " + middlename) for (username, lastname, firstname, middlename) in con.execute("SELECT username, lastname, firstname, middlename FROM users").fetchall()]
+            users=[
+                (username, lastname + ", " + firstname + " " + middlename)
+                for (username, lastname, firstname, middlename) in con.execute(
+                    "SELECT username, lastname, firstname, middlename FROM users"
+                ).fetchall()
+            ],
         )
     # From now on it's POST
     if not ("username" in request.form):
@@ -733,7 +773,6 @@ def impersonate() -> Union[Response, werkzeugResponse, str]:
     response.set_cookie("session-id", session_id, secure=PRODUCTION, httponly=True)
     logging.debug("set cookie... supposedly")
     return response
-
 
 
 if __name__ == "__main__":

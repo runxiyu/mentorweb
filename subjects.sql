@@ -35,3 +35,6 @@ INSERT INTO subjects VALUES("IBENGLIT", "IB English Literature");
 INSERT INTO subjects VALUES("IBMATH", "IB Mathematics");
 INSERT INTO subjects VALUES("IBPHY", "IB Physics");
 INSERT INTO subjects VALUES("0410", "IGCSE Music");
+INSERT INTO subjects VALUES("IBGEO", "IB Geography");
+INSERT INTO subjects VALUES("IBHIS", "IB History");
+INSERT INTO subjects VALUES("IBESS", "IB Environmental Systems and Societies");
