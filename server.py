@@ -457,7 +457,7 @@ def register() -> Union[str, Response, werkzeugResponse]:
 #         ).fetchall()
         for i in con.execute(
             "SELECT mid, mentor, time_start, time_end, notes FROM meetings WHERE mentor != ? AND coalesce(mentee, '') = ''",
-            (username, time()),
+            (username,),
         ).fetchall()
     ]
 
