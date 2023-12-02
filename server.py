@@ -687,7 +687,9 @@ def login() -> Union[Response, werkzeugResponse, str]:
         else:
             return render_template(
                 "login.html",
-                note=f'Note: You are already logged in as "{username}". Use this form to login as another user.',
+                note=Markup(
+                    f'Note: You are already logged in as <code>{username}</code>. Use this form to login as another user. You can also <a href="/impersonate">impersonate someone</a> as you are an administrator.' if username in ADMINS else 'Note: You are already logged in as <code>{username}</code>. Use this form to login as another user.'
+                ),
             )
     logging.debug("POST on /login")
     if not (
