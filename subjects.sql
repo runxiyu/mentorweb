@@ -1,6 +1,7 @@
 INSERT INTO subjects VALUES("0606", "IGCSE Additional Mathematics");
 INSERT INTO subjects VALUES("0607", "IGCSE International Mathematics");
 INSERT INTO subjects VALUES("0460", "IGCSE Geography");
+INSERT INTO subjects VALUES("0470", "IGCSE History");
 INSERT INTO subjects VALUES("0475", "IGCSE Literature in English");
 INSERT INTO subjects VALUES("0500", "IGCSE First Language English");
 INSERT INTO subjects VALUES("0478", "IGCSE Computer Science");
