@@ -323,9 +323,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
     except AuthenticationFault:
         return redirect("/login")
     lfmu = get_lfmu(username)
-    subjects = con.execute(
-        "SELECT subjects FROM users WHERE username = ?", (username,)
-    ).fetchall()[0][0]
     if request.method == "POST":
         # clean this part up a bit when you get to do so. pass unix timestamps around, not weird strings.
         try:
@@ -344,7 +341,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 lfmu=lfmu,
                 snotes=snotes,
                 mode="fill",
-                subjects=subjects,
             )
         except KeyError:
             snotes.append(
@@ -355,7 +351,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 lfmu=lfmu,
                 snotes=snotes,
                 mode="fill",
-                subjects=subjects,
             )
         if end.timestamp() <= start.timestamp():
             snotes.append(
@@ -366,7 +361,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 lfmu=lfmu,
                 snotes=snotes,
                 mode="fill",
-                subjects=subjects,
             )
         if end.timestamp() <= time():
             snotes.append(
@@ -377,7 +371,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 lfmu=lfmu,
                 snotes=snotes,
                 mode="fill",
-                subjects=subjects,
             )
         if request.form["mode"] == "confirm":
             return render_template(
@@ -390,7 +383,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 starts=start.strftime("%c"),
                 ends=end.strftime("%c"),
                 notes=request.form["notes"],
-                subjects=subjects,
             )
         elif request.form["mode"] == "confirmed":
             tstart = int(start.timestamp())
@@ -412,7 +404,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 starts=start.strftime("%c"),
                 ends=end.strftime("%c"),
                 notes=notes,
-                subjects=subjects,
             )
         else:
             snotes.append(
@@ -423,7 +414,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
                 lfmu=lfmu,
                 snotes=snotes,
                 mode="fill",
-                subjects=subjects,
             )
     elif request.method == "GET":
         return render_template(
@@ -431,7 +421,6 @@ def enlist() -> Union[Response, werkzeugResponse, str]:
             lfmu=lfmu,
             snotes=snotes,
             mode="fill",
-            subjects=subjects,
         )
     else:
         raise GeneralFault()

@@ -34,15 +34,6 @@
 You are about to enlist a block of your free time where you are capable of conducting a mentoring meeting.
 </p>
 
-{% if subjects %}
-<p>
-You are currently registered for expertise in {{ subjects }}. <a href="/expertise">Change</a>
-</p>
-{% else %}
-<p>
-You are not currently registered for expertise in any subjects. Please <a href="/expertise">fix this</a>
-</p>
-{% endif %}
 
 <form action="/enlist" method="post">
 <ul>
