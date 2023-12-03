@@ -27,7 +27,7 @@
 from __future__ import annotations
 
 ADMINS = ["s22537", "s15155"]
-ALTLAW = True
+ALTLAW = False
 PRODUCTION = False # Non-HTTPS requests will not work if in production mode.
 
 from typing import Union, Optional, Tuple, List
