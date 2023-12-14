@@ -38,7 +38,7 @@
 	<table>
 		{% for subjectid, subjectname, checked in subjects %}
 			<tr>
-				<td>
+				<td style="width: 2em;">
 				{% if checked %}
 				<input id="{{subjectid}}" type="checkbox" name="expertise" checked value="{{subjectid}}" />
 				{% else %}
