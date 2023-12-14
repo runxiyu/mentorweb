@@ -445,8 +445,9 @@ def register() -> Union[str, Response, werkzeugResponse]:
                 i[0],
                 get_lfmu(i[1]),
                 [get_subjectname(sid) for sid in get_subjectids(i[1])],
-                datetime.fromtimestamp(i[2]).strftime("%c"),
-                datetime.fromtimestamp(i[3]).strftime("%c"),
+                datetime.fromtimestamp(i[2]).strftime("%Y-%m-%d %A"),
+                datetime.fromtimestamp(i[2]).strftime("%H:%M"),
+                datetime.fromtimestamp(i[3]).strftime("%H:%M"),
                 i[4],
                 get_yeargroup(i[1]),
             )
@@ -462,8 +463,9 @@ def register() -> Union[str, Response, werkzeugResponse]:
                 i[0],
                 get_lfmu(i[1]),
                 [get_subjectname(sid) for sid in get_subjectids(i[1])],
-                datetime.fromtimestamp(i[2]).strftime("%c"),
-                datetime.fromtimestamp(i[3]).strftime("%c"),
+                datetime.fromtimestamp(i[2]).strftime("%Y-%m-%d %A"),
+                datetime.fromtimestamp(i[2]).strftime("%H:%M"),
+                datetime.fromtimestamp(i[3]).strftime("%H:%M"),
                 i[4],
                 get_yeargroup(i[1]),
             )

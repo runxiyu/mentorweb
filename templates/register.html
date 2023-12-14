@@ -31,23 +31,32 @@
 	</h2>
 	{% if available_meetings %}
 			<table>
+			<colgroup>
+				<col style="width: 11em; min-width: 11em;">
+				<col style="width: 3em; min-width: 3em;">
+				<col style="width: 20em; width: 20em;">
+				<col style="width: 7em; min-width: 7em;">
+				<col style="width: 5em; min-width: 5em;">
+				<col>
+				<col style="width: 3em; min-width: 3em;">
+			</colgroup>
 			<tr>
 				<th scope="col">Mentor</th>
 				<th scope="col"><abbr title="Mentor's Year">Year</abbr></th>
 				<th scope="col">Mentor's Subjects</th>
-				<th scope="col">Start</th>
-				<th scope="col">End</th>
+				<th scope="col">Date</th>
+				<th scope="col"><abbr title="Time in 24H Format">Time</abbr></th>
 				<th scope="col">Notes</th>
 				<th scope="col">Actions</th>
 			</tr>
 			{% for i in available_meetings %}
 				<tr>
-					<td>{{ i[1][0] }}, {{ i[1][1] }}<br>{{ i[1][2] }}</td>
-					<td>{{ i[6] }}</td>
+					<td>{{ i[1][0] }}, {{ i[1][1] }}<br />{{ i[1][2] }}</td>
+					<td>{{ i[7] }}</td>
 					<td><ul style="padding-left: 15px">{% for x in i[2] %}<li>{{x}}</li>{% endfor %}</ul></td>
 					<td>{{ i[3] }}</td>
-					<td>{{ i[4] }}</td>
-					<td>{{ i[5] }}</td>
+					<td>{{ i[4] }} to<br />{{ i[5] }}</td>
+					<td>{{ i[6] }}</td>
 					<td>
 						<a href="/meeting/{{ i[0] }}">
 						View
