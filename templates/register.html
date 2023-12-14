@@ -32,12 +32,12 @@
 	{% if available_meetings %}
 			<table>
 			<colgroup>
-				<col style="width: 11em; min-width: 11em;">
+				<col style="width: 11em; min-width: 7em;">
 				<col style="width: 3em; min-width: 3em;">
-				<col style="width: 20em; min-width: 20em;">
+				<col style="width: 20em; min-width: 7em;">
 				<col style="width: 7em; min-width: 7em;">
 				<col style="width: 5em; min-width: 5em;">
-				<col style="min-width: 10em">
+				<col style="min-width: 7em">
 				<col style="width: 3em; min-width: 3em;">
 			</colgroup>
 			<tr>
@@ -47,7 +47,7 @@
 				<th scope="col">Date</th>
 				<th scope="col"><abbr title="Time in 24H Format">Time</abbr></th>
 				<th scope="col">Notes</th>
-				<th scope="col">Actions</th>
+				<th scope="col">Action</th>
 			</tr>
 			{% for i in available_meetings %}
 				<tr>
