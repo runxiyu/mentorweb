@@ -27,7 +27,7 @@
 		{% for user in users %}
 		<li>
 			<input type="radio" id="{{ user[0] }}" name="username" value="{{ user[0] }}" />
-			<label for="{{ user[0] }}"><code>{{ user[0] }}</code> {{ user[1] }}</label>
+			<label for="{{ user[0] }}"><code>{{ user[0] }}</code> {{ user[1] }} [{{ user[2] }}]</label>
 		</li>
 		{% endfor %}
 	</ul>

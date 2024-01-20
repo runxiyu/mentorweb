@@ -778,7 +778,7 @@ def impersonate() -> Union[Response, werkzeugResponse, str, tuple[str, int]]:
         return render_template(
             "impersonate.html",
             users=[
-                (username, lastname + ", " + firstname + " " + middlename)
+                (username, lastname + ", " + firstname + " " + middlename, " ".join([w[0] for w in con.execute("SELECT subjectid FROM subject_associations WHERE username = ?", (username,)).fetchall()]))
                 for (username, lastname, firstname, middlename) in con.execute(
                     "SELECT username, lastname, firstname, middlename FROM users ORDER BY lastname, firstname, middlename ASC"
                 ).fetchall()
