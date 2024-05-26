@@ -2,7 +2,7 @@
 
 * [Active instance](https://powermentor.andrewyu.org/) (URL about to change)
 * Source:
-  [runxiyu.org](https://git.runxiyu.org/ykps/current/mentorweb.git)/[sr.ht](https://git.runxiyu.org/ykps/current/mentorweb.git)
+  [runxiyu.org](https://git.runxiyu.org/ykps/current/mentorweb.git)/[sr.ht](https://git.sr.ht/~runxiyu/mentorweb.git)
 * [Ticket tracker](https://todo.sr.ht/~runxiyu/mentorweb)
 * [Mailing list](https://lists.sr.ht/~runxiyu/ykps)
 
