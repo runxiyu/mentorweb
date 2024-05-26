@@ -1,15 +1,14 @@
-# Things to implement
+# A simple Flask meeting registration system for Peer Pao
 
-Features:
-- List subject support
-- CCA and study hall time choices
+* [Active instance](https://powermentor.andrewyu.org/) (URL about to change)
+* Source:
+  [runxiyu.org](https://git.runxiyu.org/ykps/current/mentorweb.git)/[sr.ht](https://git.runxiyu.org/ykps/current/mentorweb.git)
+* [Ticket tracker](https://todo.sr.ht/~runxiyu/mentorweb)
+* [Mailing list](https://lists.sr.ht/~runxiyu/ykps)
 
-Programatic quality:
-- Full audit?
-- uwsgi switch!
+## Features
 
-Quality of life:
-- When redirecting users without a valid cookie to the login page, use some means to specify where the login page should return them to
-- Check for time overlaps
-- Remove the idiotic shit when enlisting meetings
-- What should I deal with expired meetings?
+* All users can both be tutors and tutees
+* Tutor-side: yeargroup/subject selection, meeting creation
+* Tutee-side: yeargroup selection, meeting selection
+* Admins can impersonate other users (because this is easier to implement than a permission system or an administration interface)
